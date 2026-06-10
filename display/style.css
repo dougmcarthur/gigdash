@@ -52,10 +52,14 @@ html, body {
 }
 
 .name {
-  font-size: clamp(2.5rem, 7vh, 5rem);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-size: 0;
   text-align: center;
+}
+
+/* Wordmark logo; 5:1 aspect ratio, sized relative to the photo. */
+.name-logo {
+  width: min(calc(var(--photo-size) * 1.45), 90vw);
+  height: auto;
 }
 
 .links {
