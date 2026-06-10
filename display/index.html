@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GigDash</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="stage">
+    <section class="artist">
+      <img id="photo" class="photo" src="assets/photo.jpg" alt="Doug McArthur">
+      <div id="photo-fallback" class="photo photo-fallback" hidden>DM</div>
+      <h1 class="name">Doug McArthur</h1>
+    </section>
+    <section class="links">
+      <div class="qr-card">
+        <img class="qr" src="assets/qr.svg" alt="QR code for links.dougmcarthur.net">
+      </div>
+      <p class="qr-caption">links.dougmcarthur.net</p>
+    </section>
+  </main>
+  <script>
+    // Show initials if no photo has been dropped into assets/photo.jpg yet.
+    const photo = document.getElementById('photo');
+    photo.addEventListener('error', () => {
+      photo.hidden = true;
+      document.getElementById('photo-fallback').hidden = false;
+    });
+  </script>
+</body>
+</html>
