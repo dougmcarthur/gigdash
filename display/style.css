@@ -10,10 +10,16 @@
 
 html, body {
   height: 100%;
-  background: var(--bg);
   color: var(--fg);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   overflow: hidden;
+}
+
+/* Deep navy vignette with a faint warm glow rising from below the stage. */
+body {
+  background:
+    radial-gradient(60% 45% at 50% 105%, rgba(232, 180, 74, 0.07), transparent 70%),
+    radial-gradient(130% 95% at 50% -5%, #161b29 0%, var(--bg) 55%, #06070b 100%);
 }
 
 .stage {
@@ -29,7 +35,7 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3vh;
+  gap: 4vh;
 }
 
 .photo {
@@ -38,7 +44,9 @@ html, body {
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid var(--accent);
-  box-shadow: 0 0 60px rgba(232, 180, 74, 0.25);
+  box-shadow:
+    0 0 60px rgba(232, 180, 74, 0.22),
+    0 24px 60px rgba(0, 0, 0, 0.55);
 }
 
 .photo-fallback[hidden] {
@@ -57,13 +65,55 @@ html, body {
 
 .name {
   font-size: 0;
-  text-align: center;
 }
 
-/* Wordmark logo; 5:1 aspect ratio, sized relative to the photo. */
+/* The wordmark SVG is applied as a mask so light effects can play through
+   the lettering itself. */
 .name-logo {
+  display: block;
   width: min(calc(var(--photo-size) * 1.45), 90vw);
-  height: auto;
+  aspect-ratio: 5 / 1;
+  -webkit-mask: url("assets/logo.svg") center / contain no-repeat;
+  mask: url("assets/logo.svg") center / contain no-repeat;
+  background: var(--fg);
+}
+
+/* Variant: a soft band of light sweeps across the lettering (default). */
+body[data-logo="sheen"] .name-logo {
+  background: linear-gradient(
+    105deg,
+    var(--fg) 42%,
+    #fff7e4 50%,
+    var(--fg) 58%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  animation: logo-sheen 9s ease-in-out infinite;
+}
+
+@keyframes logo-sheen {
+  0%, 55%   { background-position: 100% 0; }
+  85%, 100% { background-position: 0% 0; }
+}
+
+/* Variant: the lettering slowly breathes. */
+body[data-logo="breathe"] .name-logo {
+  animation: logo-breathe 7s ease-in-out infinite;
+}
+
+@keyframes logo-breathe {
+  0%, 100% { opacity: 0.82; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.015); }
+}
+
+/* Variant: a soft golden halo pulses behind the lettering. */
+body[data-logo="glow"] .name-logo {
+  animation: logo-glow 6s ease-in-out infinite;
+}
+
+@keyframes logo-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(232, 180, 74, 0)); }
+  50%      { filter: drop-shadow(0 0 18px rgba(232, 180, 74, 0.55)); }
 }
 
 .links {
@@ -76,16 +126,29 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.5vh;
-  text-decoration: none;
 }
 
-/* White card behind the QR keeps it scannable on the dark stage theme. */
+/* White card behind the QR keeps it scannable on the dark stage theme;
+   a slow golden glow breathes around it to draw the eye. */
 .qr-card {
   background: #fff;
   border-radius: 24px;
   padding: 1.5vh;
   line-height: 0;
+  animation: qr-glow 5.5s ease-in-out infinite;
+}
+
+@keyframes qr-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 22px rgba(232, 180, 74, 0.16),
+      0 0 64px rgba(232, 180, 74, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 0 34px rgba(232, 180, 74, 0.42),
+      0 0 96px rgba(232, 180, 74, 0.16);
+  }
 }
 
 .qr {
@@ -93,10 +156,8 @@ html, body {
   height: var(--qr-size);
 }
 
-.qr-caption {
-  font-size: clamp(1.2rem, 3.2vh, 2.2rem);
-  color: var(--accent);
-  letter-spacing: 0.04em;
+@media (prefers-reduced-motion: reduce) {
+  .name-logo, .qr-card { animation: none !important; }
 }
 
 /* Portrait monitors: stack artist above QR. */
