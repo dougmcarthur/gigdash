@@ -2,8 +2,8 @@
   --bg: #0b0d12;
   --fg: #f5f2ea;
   --accent: #e8b44a;
-  --qr-size: clamp(140px, 26vh, 340px);
-  --logo-width: clamp(280px, 34vw, 720px);
+  --qr-size: clamp(140px, 26vh, 520px);
+  --logo-width: clamp(280px, 34vw, 1000px);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
