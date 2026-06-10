@@ -41,6 +41,10 @@ html, body {
   box-shadow: 0 0 60px rgba(232, 180, 74, 0.25);
 }
 
+.photo-fallback[hidden] {
+  display: none;
+}
+
 .photo-fallback {
   display: flex;
   align-items: center;
