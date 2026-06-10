@@ -1,0 +1,24 @@
+[Unit]
+Description=GigDash kiosk (cage + chromium)
+After=systemd-user-sessions.service plymouth-quit-wait.service
+Conflicts=getty@tty1.service
+
+[Service]
+User=gigdash
+PAMName=login
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+StandardInput=tty-fail
+StandardOutput=journal
+StandardError=journal
+UtmpIdentifier=tty1
+UtmpMode=user
+# Hide the mouse cursor immediately (-d); restart if the browser ever dies.
+ExecStart=/usr/bin/cage -d -- /opt/gigdash/bin/kiosk.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target

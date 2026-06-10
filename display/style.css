@@ -1,0 +1,91 @@
+:root {
+  --bg: #0b0d12;
+  --fg: #f5f2ea;
+  --accent: #e8b44a;
+  --photo-size: clamp(220px, 38vh, 480px);
+  --qr-size: clamp(180px, 32vh, 420px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  cursor: none;
+}
+
+.stage {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 4vw;
+  padding: 4vh 4vw;
+}
+
+.artist {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3vh;
+}
+
+.photo {
+  width: var(--photo-size);
+  height: var(--photo-size);
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--accent);
+  box-shadow: 0 0 60px rgba(232, 180, 74, 0.25);
+}
+
+.photo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--photo-size) * 0.4);
+  font-weight: 700;
+  color: var(--accent);
+  background: #1a1e28;
+}
+
+.name {
+  font-size: clamp(2.5rem, 7vh, 5rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5vh;
+}
+
+/* White card behind the QR keeps it scannable on the dark stage theme. */
+.qr-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 1.5vh;
+  line-height: 0;
+}
+
+.qr {
+  width: var(--qr-size);
+  height: var(--qr-size);
+}
+
+.qr-caption {
+  font-size: clamp(1.2rem, 3.2vh, 2.2rem);
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+
+/* Portrait monitors: stack artist above QR. */
+@media (orientation: portrait) {
+  .stage { flex-direction: column; }
+}
