@@ -31,11 +31,12 @@ Outputs: `gigdash-wedge.stl` (open in any 3D viewer / slicer) and the
 
 | Qty | Panel | Size (mm) | Notes |
 |---|---|---|---|
-| 2 | Sides | trapezoid: 340 base, 320 front, 100 rear | the shape-defining pieces |
+| 2 | Sides | trapezoid: 340 base, 320 front, 100 rear | shape-defining; 110×35 hand-hole, center 120 from front / 172 up |
 | 1 | Front | 402 × 311 | 345×225 window, centered |
 | 1 | Slope | 402 × 405 | 345×225 window, centered |
 | 1 | Bottom | 402 × 340 | |
 | 1 | Back | 402 × 91 | 3 vent slots 240×12, Ø32 grommet hole |
+| 2 | Transit lids | 375 × 255 (6 mm ply) | cover the windows in transport; see below |
 
 Front/back/bottom/slope sit *between* the side panels (hence 402 wide).
 
@@ -54,5 +55,20 @@ Front/back/bottom/slope sit *between* the side panels (hence 402 wide).
   Pi 4 in kiosk duty won't need a fan.
 - **Finish**: round the slope/front meeting edge, matte black paint or
   Danish oil. Rubber feet underneath so it doesn't slide on stage.
-- Optional: hand-hole in each side panel for carrying; a hinged or
-  screwed rear hatch instead of a fixed back panel for easier service.
+- Optional: a hinged or screwed rear hatch instead of a fixed back panel
+  for easier service.
+
+## Portability
+
+- **Hand-holes** (modeled): one rounded 110×35 slot per side panel —
+  two-handed carry, or one-handed against the hip. Sand the edges well;
+  optionally line with split rubber edge trim.
+- **Transit lids** (modeled, `gigdash-lids.stl`): two 6 mm ply covers,
+  foam-lined (5 mm adhesive foam), overlapping each window by 15 mm per
+  side. Retain with 4 pairs of Ø10×3 rare-earth magnets per lid — epoxy
+  them into shallow recesses in the lid corners and the matching face.
+  They protect the glass in the car and stack flat.
+- **Shoulder strap**: two D-rings screwed to one side panel, clip-on
+  padded strap (hands stay free for guitar + pedalboard).
+- Deliberately no wheels/telescoping handle: loaded weight is ~4.5 kg.
+  For full-rig load-ins, strap the box to a folding hand truck instead.

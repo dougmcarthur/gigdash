@@ -24,6 +24,14 @@ WIN_W, WIN_H = 345.0, 225.0      # window cutout (smaller => retaining lip)
 VENT_W, VENT_H, VENT_N = 240.0, 12.0, 3   # rear vent slots
 GROMMET_R = 16.0                          # rear cable grommet radius
 
+# Hand-holes through both side panels (rounded slot, sized for gloved hand)
+SLOT_LEN, SLOT_H = 110.0, 35.0            # overall length x height
+SLOT_Y, SLOT_Z = 120.0, 172.5             # slot center (depth, height)
+
+# Transit lids: 6mm ply covers overlapping each screen window by 15mm/side
+LID_T = 6.0
+LID_W, LID_H = WIN_W + 30, WIN_H + 30
+
 OUT = Path(__file__).resolve().parent.parent / "docs" / "enclosure"
 
 # Slope geometry
@@ -95,6 +103,17 @@ def build():
     g.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [1, 0, 0]))
     g.apply_translation([W - 70, D - T / 2, 55])
     cuts.append(g)
+    # Hand-holes: one rounded slot through each side (single full-width cut;
+    # the interior at this position is empty air, so only the sides lose wood)
+    r = SLOT_H / 2
+    slot = [box((W + 20, SLOT_LEN - SLOT_H, SLOT_H),
+                (-10, SLOT_Y - (SLOT_LEN - SLOT_H) / 2, SLOT_Z - r))]
+    for end in (-1, 1):
+        c = trimesh.creation.cylinder(radius=r, height=W + 20)
+        c.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0]))
+        c.apply_translation([W / 2, SLOT_Y + end * (SLOT_LEN - SLOT_H) / 2, SLOT_Z])
+        slot.append(c)
+    cuts += slot
 
     return trimesh.boolean.difference(
         [shell, trimesh.boolean.union(cuts, engine="manifold")], engine="manifold")
@@ -112,7 +131,19 @@ def screens():
     return [front, sloped]
 
 
-def render(mesh, views):
+def lids(offset=0.0):
+    """Transit lids covering both windows, optionally floated off the faces."""
+    stf, u, n = slope_basis()
+    front = box((LID_W, LID_T, LID_H),
+                ((W - LID_W) / 2, -LID_T - offset, T + (HF - T - WIN_H) / 2 - 15))
+    s0 = (SLOPE_LEN - WIN_H) / 2 - 15
+    sloped = box((LID_W, LID_H, LID_T), transform=stf)
+    sloped.apply_translation(
+        np.array([(W - LID_W) / 2, 0, HF]) + u * s0 + n * offset)
+    return [front, sloped]
+
+
+def render(mesh, views, extra=()):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -120,6 +151,7 @@ def render(mesh, views):
 
     parts = [(mesh, np.array([0.82, 0.70, 0.48]))]          # plywood-ish
     parts += [(s, np.array([0.10, 0.11, 0.14])) for s in screens()]
+    parts += [(m, np.array([0.72, 0.58, 0.38])) for m in extra]
     tris_list, colors_list = [], []
     light = np.array([0.4, -0.55, 0.73])
     for part, base in parts:
@@ -154,9 +186,12 @@ if __name__ == "__main__":
     mesh.export(OUT / "gigdash-wedge.stl")
     print(f"slope: {SLOPE_DEG:.1f} deg from horizontal, panel {SLOPE_LEN:.0f}mm long")
     print(f"watertight: {mesh.is_watertight}, volume: {mesh.volume / 1e6:.2f} L of wood")
+    lid_meshes = lids()
+    trimesh.util.concatenate(lid_meshes).export(OUT / "gigdash-lids.stl")
     render(mesh, {
         "front-audience": (18, -65),
         "rear-performer": (32, 115),
         "side-profile": (2, 0),
     })
+    render(mesh, {"transit-lids": (18, -65)}, extra=lids(offset=70))
     print("wrote:", *[p.name for p in sorted(OUT.iterdir())])
