@@ -14,6 +14,7 @@ html, body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   overflow: hidden;
   background: var(--bg);
+  cursor: none;
 }
 
 /* Full-bleed photo with a scrim: the bottom darkens so the logo and QR
