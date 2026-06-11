@@ -12,7 +12,6 @@ from pathlib import Path
 
 # ---------------------------------------------------------------- parameters
 T = 9.0          # panel thickness (9mm lightweight ply)
-W = 420.0        # outer width
 D = 340.0        # outer depth (front to back)
 HF = 320.0       # front face height (audience side)
 HR = 100.0       # rear height (performer side)
@@ -20,6 +19,12 @@ HR = 100.0       # rear height (performer side)
 # Monitor: CNBANAN/ZQ P160A17 16" 3:2 -- MEASURE YOURS and adjust.
 MON_W, MON_H = 360.0, 245.0      # monitor outer size incl. bezel
 WIN_W, WIN_H = 345.0, 225.0      # window cutout (smaller => retaining lip)
+
+# Clearance between each monitor side edge and the inner wall, for the
+# side-facing ports with 180-degree USB-C / mini-HDMI adapters plugged in.
+# Measure: adapter protrusion off the bezel edge, plus ~10mm of slack.
+SIDE_CLEAR = 45.0
+W = MON_W + 2 * (SIDE_CLEAR + T)  # outer width (458 with defaults)
 
 VENT_W, VENT_H, VENT_N = 240.0, 12.0, 3   # rear vent slots
 GROMMET_R = 16.0                          # rear cable grommet radius
