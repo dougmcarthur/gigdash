@@ -38,14 +38,24 @@ Outputs: `gigdash-wedge.stl` (open in any 3D viewer / slicer) and the
 | 1 | Bottom | 450 × 340 | |
 | 1 | Back | 450 × 91 | 3 vent slots 240×12, Ø32 grommet hole |
 | 2 | Transit lids | 375 × 255 (6 mm ply) | cover the windows in transport; see below |
+| 6 | Corner cleats | 15 × 15 softwood battens | 2× ~322 (bottom/side), 2× ~272 (front/side), 2× ~420 (bottom front + back) |
+| 2 | Slope ribs | 30 × 345 (9 mm ply) | glued under the slope flanking its window |
 
 Front/back/bottom/slope sit *between* the side panels (hence 402 wide).
 
 ## Assembly notes
 
 - **Joints**: glue + 18ga brads or 3.5mm screws into the side-panel edges.
-  Butt joints are fine; for clean seams, bevel the slope panel's mating
+  Glue is the structure; fasteners are just clamps while it cures — don't
+  over-screw. The corner cleats go in glued along the bottom and front
+  interior joints (screw through them into both panels). Butt joints are
+  fine; for clean seams, bevel the slope panel's mating
   edges at 33° (top, meets front) — or leave square and sand flush.
+- **Slope stiffening**: glue the two 30 mm ribs to the underside of the
+  sloped panel along the window's side edges before assembly — they guard
+  against the classic stage accident (a boot or elbow on the wedge). If
+  you expect rough handling, cutting the slope panel from 12 mm stock
+  instead is the belt-and-braces option.
 - **Monitors**: drop in behind each window, cushion the bezel with foam
   weatherstrip tape, retain with screwed-on wood strips (no glue — you
   want them removable). The windows leave a ~7 mm lip all around.

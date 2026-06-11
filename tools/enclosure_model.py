@@ -88,6 +88,20 @@ def build():
     slope.apply_translation(np.array([T, 0, HF]) - n * T)             # top edge
     panels.append(slope)
 
+    # 15x15 softwood corner cleats along the main interior joints
+    C = 15.0
+    for x in (T, W - T - C):
+        panels.append(box((C, D - 2 * T, C), (x, T, T)))              # bottom/side
+        panels.append(box((C, C, HF - 2 * T - 30), (x, T, T + C)))    # front/side
+    panels.append(box((inner_w - 2 * C, C, C), (T + C, T, T)))        # bottom/front
+    panels.append(box((inner_w - 2 * C, C, C), (T + C, D - T - C, T)))  # bottom/back
+
+    # 30mm ply stiffener ribs under the slope, flanking the window
+    for x in (25.0, W - 55.0):
+        rib = box((30.0, SLOPE_LEN - 60.0, T), transform=stf)
+        rib.apply_translation(np.array([x, 0, HF]) + u * 30.0 - n * 2 * T)
+        panels.append(rib)
+
     shell = trimesh.boolean.union(panels, engine="manifold")
 
     cuts = []
