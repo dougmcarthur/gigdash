@@ -14,7 +14,33 @@ from pathlib import Path
 SONGS_DIR = Path(__file__).resolve().parent.parent / "songs"
 OUT_PATH = Path(__file__).resolve().parent.parent / "display" / "repertoire" / "index.html"
 
-ORIGINAL_ARTISTS = {"Doug McArthur", "Doug & Amber"}
+ORIGINAL_ARTISTS = {"Doug McArthur", "Doug & Amber", "Broken Halo"}
+
+# Covers performed solo; everything else is full-band-only (Radio Riders).
+SOLO_COVER_TITLES = {
+    "Across The Universe",
+    "Ain't No Sunshine",
+    "Baby One More Time",
+    "Don't Dream It's Over",
+    "Eleanor Rigby",
+    "Fireworks",
+    "I Will Survive",
+    "Imagine",
+    "It's All Been Done",
+    "Love You Madly",
+    "Mary Jane's Last Dance",
+    "Mary Janes Last Dance",
+    "Money",
+    "Please Don't Let Me Be Misunderstood",
+    "That's All Right",
+    "The Way You Make Me Feel",
+    "What I Got",
+    "Wheat Kings",
+}
+
+
+def normalize_apostrophes(s):
+    return s.replace("’", "'")
 
 CHORD_RE = re.compile(r"\[([^\]]+)\]")
 
@@ -51,13 +77,15 @@ def parse_song(path):
 
 def main():
     songs = [parse_song(p) for p in sorted(SONGS_DIR.glob("*.cho"))]
-    covers = sorted((s for s in songs if s["artist"] not in ORIGINAL_ARTISTS), key=lambda s: s["title"].lower())
     originals = sorted((s for s in songs if s["artist"] in ORIGINAL_ARTISTS), key=lambda s: s["title"].lower())
+    covers = [s for s in songs if s["artist"] not in ORIGINAL_ARTISTS]
+    solo_covers = sorted((s for s in covers if normalize_apostrophes(s["title"]) in SOLO_COVER_TITLES), key=lambda s: s["title"].lower())
+    band_covers = sorted((s for s in covers if normalize_apostrophes(s["title"]) not in SOLO_COVER_TITLES), key=lambda s: s["title"].lower())
 
-    data = {"covers": covers, "originals": originals}
+    data = {"originals": originals, "solo_covers": solo_covers, "band_covers": band_covers}
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(TEMPLATE.replace("__DATA__", json.dumps(data)), encoding="utf-8")
-    print(f"Wrote {OUT_PATH} ({len(covers)} covers, {len(originals)} originals)")
+    print(f"Wrote {OUT_PATH} ({len(originals)} originals, {len(solo_covers)} solo covers, {len(band_covers)} band covers)")
 
 
 TEMPLATE = """<!DOCTYPE html>
@@ -136,7 +164,8 @@ TEMPLATE = """<!DOCTYPE html>
   <h1>Doug McArthur</h1>
   <p class="subtitle">Repertoire &mdash; tap a song for chords &amp; lyrics</p>
   <section id="originals"></section>
-  <section id="covers"></section>
+  <section id="solo-covers"></section>
+  <section id="band-covers"></section>
 </main>
 <script>
   const data = __DATA__;
@@ -165,7 +194,8 @@ TEMPLATE = """<!DOCTYPE html>
   }
 
   renderSection(document.getElementById('originals'), 'Originals', data.originals);
-  renderSection(document.getElementById('covers'), 'Covers', data.covers);
+  renderSection(document.getElementById('solo-covers'), 'Covers — Solo', data.solo_covers);
+  renderSection(document.getElementById('band-covers'), 'Covers — Radio Riders (Full Band)', data.band_covers);
 </script>
 </body>
 </html>
