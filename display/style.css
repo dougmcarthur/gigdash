@@ -101,6 +101,25 @@ body[data-logo="glow"] .name-logo {
   50%      { filter: drop-shadow(0 0 18px rgba(232, 180, 74, 0.55)); }
 }
 
+/* The QR card and the "latest release" card occupy the same box and
+   crossfade between each other. */
+.card-carousel {
+  position: relative;
+  width: var(--qr-size);
+  height: var(--qr-size);
+}
+
+.carousel-card {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.carousel-card.is-active {
+  opacity: 1;
+}
+
 /* On the web the QR doubles as a tappable link; on the kiosk there's no
    pointer, so this is inert. */
 .qr-link {
@@ -225,6 +244,39 @@ body[data-qr="sparkle"] .sparkle {
 .qr {
   width: var(--qr-size);
   height: var(--qr-size);
+}
+
+/* "Latest release" carousel card: cover art with a caption strip along the
+   bottom, sized to match the QR card. */
+.release-card {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 0 26px rgba(243, 230, 214, 0.3);
+}
+
+.release-cover {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.release-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0.8em 1em;
+  background: rgba(11, 13, 18, 0.65);
+  color: var(--fg);
+  font-size: clamp(0.8rem, 1.6vh, 1.3rem);
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.02em;
 }
 
 @media (prefers-reduced-motion: reduce) {
