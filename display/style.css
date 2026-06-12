@@ -5,12 +5,11 @@
   --qr-size: clamp(140px, 26vh, 520px);
   --logo-width: clamp(280px, 34vw, 1000px);
 
-  /* Palette pulled from the "Magic" cover art: deep forest teal, peach
-     mushrooms, and the pale dawn-sky cream/pink. */
+  /* Palette pulled from the "Magic" cover art: deep teal, forest green,
+     and the pale dawn-sky cream. */
   --magic-teal: #2f4a44;
-  --magic-peach: #f0a878;
+  --magic-green: #3e5c44;
   --magic-cream: #f3e6d6;
-  --magic-pink: #f3d3cf;
 
   --qr-border-width: 4px;
 }
@@ -151,13 +150,13 @@ body[data-qr="border"] .qr-card {
     linear-gradient(#fff, #fff) padding-box,
     conic-gradient(
       from var(--border-angle),
-      var(--magic-peach),
       var(--magic-cream),
-      var(--magic-teal) 35%,
-      var(--magic-pink) 60%,
-      var(--magic-peach)
+      var(--magic-green),
+      var(--magic-teal) 50%,
+      var(--magic-green) 75%,
+      var(--magic-cream)
     ) border-box;
-  box-shadow: 0 0 26px rgba(240, 168, 120, 0.3);
+  box-shadow: 0 0 26px rgba(243, 230, 214, 0.3);
   animation: border-spin 4s linear infinite;
 }
 
@@ -167,7 +166,7 @@ body[data-qr="border"] .qr-card {
 
 /* Variant: a soft conic-gradient halo slowly rotates behind the card. */
 body[data-qr="ring"] .qr-card {
-  box-shadow: 0 0 26px rgba(240, 168, 120, 0.3);
+  box-shadow: 0 0 26px rgba(243, 230, 214, 0.3);
 }
 
 body[data-qr="ring"] .qr-card::before {
@@ -178,11 +177,11 @@ body[data-qr="ring"] .qr-card::before {
   border-radius: 30px;
   background: conic-gradient(
     from 0deg,
-    var(--magic-peach),
     var(--magic-cream),
+    var(--magic-green),
     var(--magic-teal) 35%,
     transparent 60%,
-    var(--magic-peach)
+    var(--magic-cream)
   );
   filter: blur(18px);
   opacity: 0.75;
@@ -199,7 +198,7 @@ body[data-qr="ring"] .qr-card::before {
 }
 
 body[data-qr="sparkle"] .qr-card {
-  box-shadow: 0 0 22px rgba(240, 168, 120, 0.25);
+  box-shadow: 0 0 22px rgba(243, 230, 214, 0.25);
 }
 
 body[data-qr="sparkle"] .sparkle {
@@ -209,7 +208,7 @@ body[data-qr="sparkle"] .sparkle {
   height: 7px;
   border-radius: 50%;
   background: var(--magic-cream);
-  box-shadow: 0 0 10px 3px rgba(240, 168, 120, 0.85);
+  box-shadow: 0 0 10px 3px rgba(62, 92, 68, 0.85);
   animation: sparkle-twinkle 2.6s ease-in-out infinite;
 }
 
