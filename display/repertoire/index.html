@@ -265,27 +265,58 @@
   const contentArtist = document.getElementById('content-artist');
   const contentBody = document.getElementById('content-body');
   const categories = Array.from(document.querySelectorAll('.category'));
+  const songMap = {};
   let activeItem = null;
 
   function isMobile() {
     return window.innerWidth < 800;
   }
 
-  function showSong(song, item) {
+  function applyState(state) {
+    categories.forEach((c) => c.classList.remove('is-expanded'));
     if (activeItem) activeItem.classList.remove('is-active');
-    activeItem = item;
-    activeItem.classList.add('is-active');
-    contentTitle.textContent = song.title;
-    contentArtist.textContent = song.artist;
-    contentBody.innerHTML = song.body;
-    content.classList.add('is-open');
-    content.scrollTop = 0;
-    if (isMobile()) document.body.dataset.view = 'content';
+    content.classList.remove('is-open');
+    document.body.dataset.view = state.view;
+
+    if (state.categoryId) {
+      const cat = document.getElementById(state.categoryId);
+      if (cat) cat.classList.add('is-expanded');
+    }
+    if (state.view === 'content' && state.songId && songMap[state.songId]) {
+      const entry = songMap[state.songId];
+      activeItem = entry.item;
+      activeItem.classList.add('is-active');
+      contentTitle.textContent = entry.song.title;
+      contentArtist.textContent = entry.song.artist;
+      contentBody.innerHTML = entry.song.body;
+      content.classList.add('is-open');
+      content.scrollTop = 0;
+    }
+  }
+
+  function navigateTo(state) {
+    applyState(state);
+    if (isMobile()) history.pushState(state, '');
+  }
+
+  window.addEventListener('popstate', (e) => {
+    applyState(e.state || { view: 'categories' });
+  });
+
+  function showSong(song, item, songId) {
+    if (isMobile()) {
+      navigateTo({ view: 'content', categoryId: item.closest('.category').id, songId });
+    } else {
+      applyState({ view: 'content', categoryId: item.closest('.category').id, songId });
+    }
   }
 
   document.getElementById('back-button').addEventListener('click', () => {
-    content.classList.remove('is-open');
-    if (isMobile()) document.body.dataset.view = 'songs';
+    if (isMobile()) {
+      history.back();
+    } else {
+      content.classList.remove('is-open');
+    }
   });
 
   function renderCategory(el, heading, songs) {
@@ -295,12 +326,9 @@
     toggle.addEventListener('click', () => {
       if (isMobile()) {
         if (el.classList.contains('is-expanded')) {
-          el.classList.remove('is-expanded');
-          document.body.dataset.view = 'categories';
+          history.back();
         } else {
-          categories.forEach((c) => c.classList.remove('is-expanded'));
-          el.classList.add('is-expanded');
-          document.body.dataset.view = 'songs';
+          navigateTo({ view: 'songs', categoryId: el.id });
         }
       } else {
         el.classList.toggle('is-expanded');
@@ -310,18 +338,20 @@
 
     const list = document.createElement('div');
     list.className = 'song-list';
-    for (const song of songs) {
+    songs.forEach((song, index) => {
       const wrap = document.createElement('div');
       wrap.className = 'song-item';
+      const songId = `${el.id}-${index}`;
+      songMap[songId] = { song, item: wrap };
 
       const songToggle = document.createElement('button');
       songToggle.className = 'song-toggle';
       songToggle.innerHTML = `<span><span class="title">${song.title}</span><span class="artist">${song.artist}</span></span><span class="arrow">&#8250;</span>`;
-      songToggle.addEventListener('click', () => showSong(song, wrap));
+      songToggle.addEventListener('click', () => showSong(song, wrap, songId));
 
       wrap.appendChild(songToggle);
       list.appendChild(wrap);
-    }
+    });
     el.appendChild(list);
   }
 
@@ -329,6 +359,7 @@
   renderCategory(document.getElementById('solo-covers'), 'Covers — Solo', data.solo_covers);
   renderCategory(document.getElementById('band-covers'), 'Covers — Radio Riders (Full Band)', data.band_covers);
 
+  history.replaceState({ view: 'categories' }, '');
   document.body.dataset.view = 'categories';
 </script>
 </body>
