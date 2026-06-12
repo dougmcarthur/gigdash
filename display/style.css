@@ -100,12 +100,18 @@ body[data-logo="glow"] .name-logo {
   line-height: 0;
 }
 
-/* White card behind the QR keeps it scannable on the dark scrim;
-   a slow golden glow breathes around it to draw the eye. */
+/* White card behind the QR keeps it scannable on the dark scrim. The accent
+   animation around it (glow / rotating ring / sparkles) is controlled by
+   body[data-qr] below. */
 .qr-card {
+  position: relative;
   background: #fff;
   border-radius: 20px;
   padding: 1.4vh;
+}
+
+/* Variant: a slow golden glow breathes around the card (default fallback). */
+body[data-qr="pulse"] .qr-card {
   animation: qr-glow 5.5s ease-in-out infinite;
 }
 
@@ -122,11 +128,69 @@ body[data-logo="glow"] .name-logo {
   }
 }
 
+/* Variant: a soft conic-gradient halo slowly rotates behind the card. */
+body[data-qr="ring"] .qr-card {
+  box-shadow: 0 0 26px rgba(232, 180, 74, 0.22);
+}
+
+body[data-qr="ring"] .qr-card::before {
+  content: "";
+  position: absolute;
+  inset: -14%;
+  z-index: -1;
+  border-radius: 30px;
+  background: conic-gradient(
+    from 0deg,
+    var(--accent),
+    #fff7e4,
+    var(--accent) 35%,
+    transparent 60%,
+    var(--accent)
+  );
+  filter: blur(18px);
+  opacity: 0.75;
+  animation: qr-ring-spin 9s linear infinite;
+}
+
+@keyframes qr-ring-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Variant: small golden sparkles twinkle around the corners. */
+.sparkle {
+  display: none;
+}
+
+body[data-qr="sparkle"] .qr-card {
+  box-shadow: 0 0 22px rgba(232, 180, 74, 0.18);
+}
+
+body[data-qr="sparkle"] .sparkle {
+  display: block;
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff7e4;
+  box-shadow: 0 0 10px 3px rgba(232, 180, 74, 0.85);
+  animation: sparkle-twinkle 2.6s ease-in-out infinite;
+}
+
+.sparkle-1 { top: -6px;    left: -6px;   animation-delay: 0s; }
+.sparkle-2 { top: -6px;    right: -6px;  animation-delay: 0.7s; }
+.sparkle-3 { bottom: -6px; right: -6px;  animation-delay: 1.4s; }
+.sparkle-4 { bottom: -6px; left: -6px;   animation-delay: 2.1s; }
+
+@keyframes sparkle-twinkle {
+  0%, 100% { opacity: 0;   transform: scale(0.3); }
+  50%      { opacity: 1;   transform: scale(1); }
+}
+
 .qr {
   width: var(--qr-size);
   height: var(--qr-size);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .name-logo, .qr-card { animation: none !important; }
+  .name-logo, .qr-card, .qr-card::before, .sparkle { animation: none !important; }
 }
