@@ -20,4 +20,5 @@ exec "$BROWSER" \
     --ozone-platform=wayland \
     --autoplay-policy=no-user-gesture-required \
     --password-store=basic \
+    --disable-gpu-rasterization \
     "file:///opt/gigdash/display/index.html"
