@@ -16,7 +16,7 @@ StandardError=journal
 UtmpIdentifier=tty1
 UtmpMode=user
 # Hide the mouse cursor immediately (-d); restart if the browser ever dies.
-ExecStart=/usr/bin/cage -d -- /opt/gigdash/bin/kiosk.sh
+ExecStart=/usr/bin/cage -d -- /opt/gigdash/bin/boot-select.sh
 Restart=always
 RestartSec=2
 

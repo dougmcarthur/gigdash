@@ -27,6 +27,7 @@ usermod -aG video,render,input gigdash
 mkdir -p /opt/gigdash/bin
 cp -r "$REPO_DIR/display" /opt/gigdash/
 install -m 0755 "$REPO_DIR/pi/kiosk.sh" /opt/gigdash/bin/kiosk.sh
+install -m 0755 "$REPO_DIR/pi/boot-select.sh" /opt/gigdash/bin/boot-select.sh
 
 # Regenerate the QR code at install time so a URL change only needs an edit here.
 qrencode -t SVG -o /opt/gigdash/display/assets/qr.svg -m 2 \

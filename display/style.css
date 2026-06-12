@@ -2,82 +2,124 @@
   --bg: #0b0d12;
   --fg: #f5f2ea;
   --accent: #e8b44a;
-  --photo-size: clamp(220px, 38vh, 480px);
-  --qr-size: clamp(180px, 32vh, 420px);
+  --qr-size: clamp(140px, 26vh, 520px);
+  --logo-width: clamp(280px, 34vw, 1000px);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
   height: 100%;
-  background: var(--bg);
   color: var(--fg);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   overflow: hidden;
+  background: var(--bg);
+  cursor: none;
 }
 
+/* Full-bleed photo with a scrim: the bottom darkens so the logo and QR
+   stay legible, plus a gentle vignette around the edges. */
 .stage {
   height: 100vh;
+  background:
+    linear-gradient(to top,
+      rgba(4, 5, 9, 0.82) 0%,
+      rgba(4, 5, 9, 0.45) 18%,
+      rgba(4, 5, 9, 0.12) 38%,
+      transparent 60%),
+    radial-gradient(140% 110% at 50% 40%,
+      transparent 60%,
+      rgba(4, 5, 9, 0.45) 100%),
+    url("assets/doug-mcarthur-landscape-3000x2000.jpg") center / cover no-repeat,
+    var(--bg);
   display: flex;
-  align-items: center;
-  justify-content: space-evenly;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 5vh 4vw;
   gap: 4vw;
-  padding: 4vh 4vw;
-}
-
-.artist {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3vh;
-}
-
-.photo {
-  width: var(--photo-size);
-  height: var(--photo-size);
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid var(--accent);
-  box-shadow: 0 0 60px rgba(232, 180, 74, 0.25);
-}
-
-.photo-fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(var(--photo-size) * 0.4);
-  font-weight: 700;
-  color: var(--accent);
-  background: #1a1e28;
 }
 
 .name {
-  font-size: clamp(2.5rem, 7vh, 5rem);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-align: center;
+  font-size: 0;
 }
 
-.links {
-  display: flex;
+/* The wordmark SVG is applied as a mask so light effects can play through
+   the lettering itself. */
+.name-logo {
+  display: block;
+  width: var(--logo-width);
+  aspect-ratio: 5 / 1;
+  -webkit-mask: url("assets/logo.svg") center / contain no-repeat;
+  mask: url("assets/logo.svg") center / contain no-repeat;
+  background: var(--fg);
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.6));
+}
+
+/* Variant: a soft band of light sweeps across the lettering (default). */
+body[data-logo="sheen"] .name-logo {
+  background: linear-gradient(
+    105deg,
+    var(--fg) 42%,
+    #fff7e4 50%,
+    var(--fg) 58%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  animation: logo-sheen 9s ease-in-out infinite;
+}
+
+@keyframes logo-sheen {
+  0%, 55%   { background-position: 100% 0; }
+  85%, 100% { background-position: 0% 0; }
+}
+
+/* Variant: the lettering slowly breathes. */
+body[data-logo="breathe"] .name-logo {
+  animation: logo-breathe 7s ease-in-out infinite;
+}
+
+@keyframes logo-breathe {
+  0%, 100% { opacity: 0.82; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.015); }
+}
+
+/* Variant: a soft golden halo pulses behind the lettering. */
+body[data-logo="glow"] .name-logo {
+  animation: logo-glow 6s ease-in-out infinite;
+}
+
+@keyframes logo-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(232, 180, 74, 0)); }
+  50%      { filter: drop-shadow(0 0 18px rgba(232, 180, 74, 0.55)); }
 }
 
 /* On the web the QR doubles as a tappable link; on the kiosk there's no
    pointer, so this is inert. */
 .qr-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2.5vh;
-  text-decoration: none;
+  display: block;
+  line-height: 0;
 }
 
-/* White card behind the QR keeps it scannable on the dark stage theme. */
+/* White card behind the QR keeps it scannable on the dark scrim;
+   a slow golden glow breathes around it to draw the eye. */
 .qr-card {
   background: #fff;
-  border-radius: 24px;
-  padding: 1.5vh;
-  line-height: 0;
+  border-radius: 20px;
+  padding: 1.4vh;
+  animation: qr-glow 5.5s ease-in-out infinite;
+}
+
+@keyframes qr-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 22px rgba(232, 180, 74, 0.18),
+      0 0 64px rgba(232, 180, 74, 0.07);
+  }
+  50% {
+    box-shadow:
+      0 0 34px rgba(232, 180, 74, 0.5),
+      0 0 96px rgba(232, 180, 74, 0.18);
+  }
 }
 
 .qr {
@@ -85,13 +127,6 @@ html, body {
   height: var(--qr-size);
 }
 
-.qr-caption {
-  font-size: clamp(1.2rem, 3.2vh, 2.2rem);
-  color: var(--accent);
-  letter-spacing: 0.04em;
-}
-
-/* Portrait monitors: stack artist above QR. */
-@media (orientation: portrait) {
-  .stage { flex-direction: column; }
+@media (prefers-reduced-motion: reduce) {
+  .name-logo, .qr-card { animation: none !important; }
 }
