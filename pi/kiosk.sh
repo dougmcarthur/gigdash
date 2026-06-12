@@ -10,6 +10,8 @@ else
     BROWSER=chromium
 fi
 
+# --allow-file-access-from-files: script.js fetches config.json, which
+# Chromium otherwise blocks under file:// (each file is its own origin).
 exec "$BROWSER" \
     --kiosk \
     --incognito \
@@ -20,4 +22,5 @@ exec "$BROWSER" \
     --ozone-platform=wayland \
     --autoplay-policy=no-user-gesture-required \
     --password-store=basic \
+    --allow-file-access-from-files \
     "file:///opt/gigdash/display/index.html"

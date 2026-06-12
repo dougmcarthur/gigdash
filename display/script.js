@@ -125,9 +125,18 @@ async function applyConfig(config) {
 }
 
 async function init() {
-  const res = await fetch('config.json');
-  const config = await res.json();
-  await applyConfig(config);
+  try {
+    const res = await fetch('config.json');
+    const config = await res.json();
+    await applyConfig(config);
+  } catch (err) {
+    console.error('Failed to load config.json', err);
+    document.querySelector('.card-carousel').innerHTML =
+      '<div class="carousel-card is-active"><div class="card-face card-face-text">' +
+      '<p class="card-eyebrow">Config error</p>' +
+      '<p class="gig-venue">Could not load config.json</p>' +
+      '</div></div>';
+  }
 }
 
 window.addEventListener('message', (event) => {
