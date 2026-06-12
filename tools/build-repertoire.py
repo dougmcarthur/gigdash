@@ -39,6 +39,17 @@ SOLO_COVER_TITLES = {
 }
 
 
+# Solo covers that also appear in the Radio Riders (full band) set.
+BOTH_COVER_TITLES = {
+    "Fireworks",
+    "I Will Survive",
+    "It's All Been Done",
+    "Mary Jane's Last Dance",
+    "Mary Janes Last Dance",
+    "What I Got",
+}
+
+
 def normalize_apostrophes(s):
     return s.replace("’", "'")
 
@@ -81,7 +92,7 @@ def main():
     originals = sorted((s for s in songs if s["artist"] in ORIGINAL_ARTISTS), key=lambda s: s["title"].lower())
     covers = [s for s in songs if s["artist"] not in ORIGINAL_ARTISTS]
     solo_covers = sorted((s for s in covers if normalize_apostrophes(s["title"]) in SOLO_COVER_TITLES), key=lambda s: s["title"].lower())
-    band_covers = sorted((s for s in covers if normalize_apostrophes(s["title"]) not in SOLO_COVER_TITLES), key=lambda s: s["title"].lower())
+    band_covers = sorted((s for s in covers if normalize_apostrophes(s["title"]) not in SOLO_COVER_TITLES or normalize_apostrophes(s["title"]) in BOTH_COVER_TITLES), key=lambda s: s["title"].lower())
 
     data = {"originals": originals, "solo_covers": solo_covers, "band_covers": band_covers}
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
