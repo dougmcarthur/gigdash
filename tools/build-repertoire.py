@@ -129,6 +129,7 @@ TEMPLATE = """<!DOCTYPE html>
   *::-webkit-scrollbar-thumb:hover { background: #4a5263; }
   html, body {
     height: 100%;
+    overflow: hidden;
     background: var(--bg);
     color: var(--fg);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -137,9 +138,11 @@ TEMPLATE = """<!DOCTYPE html>
   .layout {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100%;
   }
   .sidebar {
+    flex: 1;
+    min-height: 0;
     padding: 1.2rem 1rem 2rem;
     overflow-y: auto;
     scrollbar-gutter: stable;
@@ -181,11 +184,15 @@ TEMPLATE = """<!DOCTYPE html>
 
   .content {
     display: none;
+    flex: 1;
+    min-height: 0;
     padding: 1.2rem 1rem 4rem;
     font-family: "SF Mono", "Menlo", "Consolas", monospace;
     font-size: 1rem;
     line-height: 1.6;
+    overflow-y: auto;
     overflow-x: auto;
+    scrollbar-gutter: stable;
   }
   .content.is-open { display: block; }
   .back-button {
@@ -209,12 +216,9 @@ TEMPLATE = """<!DOCTYPE html>
     .sidebar {
       width: 320px;
       flex-shrink: 0;
-      height: 100vh;
       border-right: 1px solid var(--border);
     }
     .content {
-      flex: 1;
-      height: 100vh;
       padding: 2rem 3rem 4rem;
       font-size: 1.25rem;
       line-height: 1.8;
