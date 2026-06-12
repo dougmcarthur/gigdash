@@ -29,6 +29,12 @@
     const qrVariants = ['pulse', 'ring', 'sparkle', 'border', 'none'];
     const requestedQr = new URLSearchParams(location.search).get('qr');
     document.body.dataset.qr = qrVariants.includes(requestedQr) ? requestedQr : 'ring';
+
+    // Border thickness for ?qr=border, in px: ?qrWidth=8
+    const requestedWidth = parseFloat(new URLSearchParams(location.search).get('qrWidth'));
+    if (!isNaN(requestedWidth) && requestedWidth >= 0) {
+      document.body.style.setProperty('--qr-border-width', `${requestedWidth}px`);
+    }
   </script>
 </body>
 </html>
