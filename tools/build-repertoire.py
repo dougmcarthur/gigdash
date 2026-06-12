@@ -77,6 +77,7 @@ def parse_song(path):
 
 def main():
     songs = [parse_song(p) for p in sorted(SONGS_DIR.glob("*.cho"))]
+    songs = [s for s in songs if s["artist"] != "Ladywood"]
     originals = sorted((s for s in songs if s["artist"] in ORIGINAL_ARTISTS), key=lambda s: s["title"].lower())
     covers = [s for s in songs if s["artist"] not in ORIGINAL_ARTISTS]
     solo_covers = sorted((s for s in covers if normalize_apostrophes(s["title"]) in SOLO_COVER_TITLES), key=lambda s: s["title"].lower())
