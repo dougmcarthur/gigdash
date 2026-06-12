@@ -279,6 +279,46 @@ body[data-qr="sparkle"] .sparkle {
   50%      { opacity: 1;   transform: scale(1); }
 }
 
+/* Text-based card variant (e.g. next-gig date/venue), in place of an
+   image + caption. */
+.card-face-text {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1.4em 1.2em;
+}
+
+.card-eyebrow {
+  margin: 0 0 0.4em;
+  color: var(--magic-green);
+  font-family: "Poppins", "Futura", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(0.7rem, 1.4vh, 1.1rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.gig-date {
+  margin: 0;
+  color: var(--magic-teal);
+  font-family: "Poppins", "Futura", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(1.2rem, 3.2vh, 2.4rem);
+  font-weight: 700;
+}
+
+.gig-venue {
+  margin: 0.3em 0 0;
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: clamp(0.9rem, 2vh, 1.4rem);
+}
+
+.gig-location {
+  margin: 0.1em 0 0;
+  color: var(--magic-teal);
+  font-size: clamp(0.8rem, 1.6vh, 1.2rem);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .name-logo, .card-face, .card-face::before, .sparkle { animation: none !important; }
   body[data-qr="border"] .card-face { --border-angle: 45deg; }

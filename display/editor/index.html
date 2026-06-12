@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GigDash — Display Editor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Options panel -->
+    <aside class="w-full max-w-md overflow-y-auto bg-white border-r border-slate-200 p-4 space-y-4">
+      <h1 class="text-lg font-bold">GigDash Display Editor</h1>
+      <p class="text-sm text-slate-500">
+        Edit the carousel and animation settings, preview live on the right,
+        then download <code class="bg-slate-100 px-1 rounded">config.json</code>
+        and replace the one in <code class="bg-slate-100 px-1 rounded">display/</code>.
+      </p>
+
+      <!-- Global settings card -->
+      <section class="rounded-2xl bg-slate-50 border border-slate-200 divide-y divide-slate-200">
+        <div class="px-4 py-3 flex items-center justify-between gap-3">
+          <label class="text-sm font-medium" for="logoAnimation">Logo animation</label>
+          <select id="logoAnimation" class="rounded-lg border border-slate-300 px-2 py-1 text-sm">
+            <option value="sheen">Sheen</option>
+            <option value="breathe">Breathe</option>
+            <option value="glow">Glow</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="px-4 py-3 flex items-center justify-between gap-3">
+          <label class="text-sm font-medium" for="cardAnimation">Card accent</label>
+          <select id="cardAnimation" class="rounded-lg border border-slate-300 px-2 py-1 text-sm">
+            <option value="border">Rotating border</option>
+            <option value="pulse">Pulse glow</option>
+            <option value="ring">Halo ring</option>
+            <option value="sparkle">Sparkle</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="px-4 py-3 flex items-center justify-between gap-3">
+          <label class="text-sm font-medium" for="carouselIntervalMs">Slide duration (sec)</label>
+          <input id="carouselIntervalMs" type="number" min="3" step="1"
+                 class="w-20 rounded-lg border border-slate-300 px-2 py-1 text-sm text-right">
+        </div>
+        <div class="px-4 py-3 flex items-center justify-between gap-3">
+          <label class="text-sm font-medium" for="qrBorderWidth">Border width (px)</label>
+          <input id="qrBorderWidth" type="number" min="0" step="1"
+                 class="w-20 rounded-lg border border-slate-300 px-2 py-1 text-sm text-right">
+        </div>
+      </section>
+
+      <!-- Slide list -->
+      <section>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Slides</h2>
+          <div class="flex gap-2">
+            <button data-add="image" class="text-xs rounded-full bg-slate-200 px-3 py-1 font-medium hover:bg-slate-300">+ Image</button>
+            <button data-add="qr" class="text-xs rounded-full bg-slate-200 px-3 py-1 font-medium hover:bg-slate-300">+ QR</button>
+            <button data-add="next-gig" class="text-xs rounded-full bg-slate-200 px-3 py-1 font-medium hover:bg-slate-300">+ Next Gig</button>
+          </div>
+        </div>
+        <div id="slideList" class="space-y-3"></div>
+      </section>
+
+      <button id="download" class="w-full rounded-xl bg-slate-900 text-white py-2.5 text-sm font-semibold hover:bg-slate-700">
+        Download config.json
+      </button>
+    </aside>
+
+    <!-- Live preview -->
+    <main class="flex-1 flex items-center justify-center bg-slate-200 p-6">
+      <div class="w-full max-w-5xl aspect-video bg-black rounded-2xl shadow-2xl overflow-hidden">
+        <iframe id="preview" src="../index.html?carousel=off" class="w-full h-full border-0"></iframe>
+      </div>
+    </main>
+  </div>
+
+<script>
+const slideListEl = document.getElementById('slideList');
+const preview = document.getElementById('preview');
+let config = null;
+
+const FIELD_DEFS = {
+  image: [
+    { key: 'image', label: 'Image path', placeholder: 'assets/cover.jpg' },
+    { key: 'caption', label: 'Caption', placeholder: 'New Single — Out Now' },
+    { key: 'url', label: 'Link URL (optional)', placeholder: 'https://...' },
+  ],
+  qr: [
+    { key: 'image', label: 'QR image path', placeholder: 'assets/qr.svg' },
+    { key: 'caption', label: 'Caption', placeholder: 'About Me' },
+    { key: 'url', label: 'Link URL', placeholder: 'https://...' },
+  ],
+  'next-gig': [
+    { key: 'caption', label: 'Caption', placeholder: 'Next Show' },
+    { key: 'bandsintown.artistName', label: 'Bandsintown artist name', placeholder: 'Doug McArthur' },
+    { key: 'bandsintown.appId', label: 'Bandsintown app ID', placeholder: 'app id' },
+  ],
+};
+
+const TYPE_LABELS = { image: 'Image', qr: 'QR Code', 'next-gig': 'Next Gig (Bandsintown)' };
+
+function getPath(obj, path) {
+  return path.split('.').reduce((o, k) => (o ? o[k] : undefined), obj);
+}
+
+function setPath(obj, path, value) {
+  const keys = path.split('.');
+  const last = keys.pop();
+  const target = keys.reduce((o, k) => (o[k] ??= {}), obj);
+  target[last] = value;
+}
+
+function render() {
+  document.getElementById('logoAnimation').value = config.logoAnimation || 'sheen';
+  document.getElementById('cardAnimation').value = config.cardAnimation || 'border';
+  document.getElementById('carouselIntervalMs').value = (config.carouselIntervalMs || 18000) / 1000;
+  document.getElementById('qrBorderWidth').value = config.qrBorderWidth ?? 6;
+
+  slideListEl.innerHTML = '';
+  config.slides.forEach((slide, i) => {
+    const card = document.createElement('div');
+    card.className = 'rounded-2xl bg-slate-50 border border-slate-200 p-3 space-y-2';
+
+    const header = document.createElement('div');
+    header.className = 'flex items-center justify-between';
+    header.innerHTML = `
+      <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">${TYPE_LABELS[slide.type] || slide.type}</span>
+      <div class="flex gap-1">
+        <button class="text-xs rounded-full bg-slate-200 w-6 h-6 hover:bg-slate-300" data-move="-1">↑</button>
+        <button class="text-xs rounded-full bg-slate-200 w-6 h-6 hover:bg-slate-300" data-move="1">↓</button>
+        <button class="text-xs rounded-full bg-red-100 text-red-700 w-6 h-6 hover:bg-red-200" data-remove>✕</button>
+      </div>`;
+    header.querySelector('[data-move="-1"]').onclick = () => moveSlide(i, -1);
+    header.querySelector('[data-move="1"]').onclick = () => moveSlide(i, 1);
+    header.querySelector('[data-remove]').onclick = () => removeSlide(i);
+    card.appendChild(header);
+
+    (FIELD_DEFS[slide.type] || []).forEach((field) => {
+      const row = document.createElement('label');
+      row.className = 'block text-sm';
+      row.innerHTML = `<span class="block text-xs text-slate-500 mb-0.5">${field.label}</span>`;
+      const input = document.createElement('input');
+      input.className = 'w-full rounded-lg border border-slate-300 px-2 py-1 text-sm';
+      input.placeholder = field.placeholder || '';
+      input.value = getPath(slide, field.key) || '';
+      input.oninput = () => {
+        setPath(slide, field.key, input.value);
+        updatePreview();
+      };
+      row.appendChild(input);
+      card.appendChild(row);
+    });
+
+    slideListEl.appendChild(card);
+  });
+}
+
+function moveSlide(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= config.slides.length) return;
+  [config.slides[i], config.slides[j]] = [config.slides[j], config.slides[i]];
+  render();
+  updatePreview();
+}
+
+function removeSlide(i) {
+  config.slides.splice(i, 1);
+  render();
+  updatePreview();
+}
+
+function addSlide(type) {
+  const base = { type, caption: '' };
+  if (type === 'image') Object.assign(base, { image: '', caption: 'New Slide' });
+  if (type === 'qr') Object.assign(base, { image: '', caption: 'Scan Me', url: '' });
+  if (type === 'next-gig') Object.assign(base, { caption: 'Next Show', bandsintown: { artistName: '', appId: '' } });
+  config.slides.push(base);
+  render();
+  updatePreview();
+}
+
+function updatePreview() {
+  preview.contentWindow.postMessage({ type: 'gigdash-config', config }, '*');
+}
+
+document.getElementById('logoAnimation').onchange = (e) => { config.logoAnimation = e.target.value; updatePreview(); };
+document.getElementById('cardAnimation').onchange = (e) => { config.cardAnimation = e.target.value; updatePreview(); };
+document.getElementById('carouselIntervalMs').oninput = (e) => { config.carouselIntervalMs = (Number(e.target.value) || 18) * 1000; updatePreview(); };
+document.getElementById('qrBorderWidth').oninput = (e) => { config.qrBorderWidth = Number(e.target.value) || 0; updatePreview(); };
+
+document.querySelectorAll('[data-add]').forEach((btn) => {
+  btn.onclick = () => addSlide(btn.dataset.add);
+});
+
+document.getElementById('download').onclick = () => {
+  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'config.json';
+  a.click();
+};
+
+fetch('../config.json')
+  .then((r) => r.json())
+  .then((data) => {
+    config = data;
+    render();
+    preview.onload = updatePreview;
+  });
+</script>
+</body>
+</html>

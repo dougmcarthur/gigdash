@@ -1,0 +1,33 @@
+{
+  "logoAnimation": "sheen",
+  "cardAnimation": "border",
+  "carouselIntervalMs": 18000,
+  "qrBorderWidth": 6,
+  "slides": [
+    {
+      "type": "qr",
+      "image": "assets/qr.svg",
+      "caption": "About Me",
+      "url": "https://links.dougmcarthur.net"
+    },
+    {
+      "type": "image",
+      "image": "assets/lost-weekends-1080x1080.jpg",
+      "caption": "Lost Weekends — Out Now"
+    },
+    {
+      "type": "qr",
+      "image": "assets/ig-dougmcarthur.png",
+      "caption": "Follow Me",
+      "url": "https://instagram.com/dougmcarthur"
+    },
+    {
+      "type": "next-gig",
+      "caption": "Next Show",
+      "bandsintown": {
+        "artistName": "Doug McArthur",
+        "appId": "57efbd0a6e87351d0434aa40e54979a9"
+      }
+    }
+  ]
+}

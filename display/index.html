@@ -9,68 +9,8 @@
 <body>
   <main class="stage">
     <h1 class="name"><span class="name-logo" role="img" aria-label="Doug McArthur"></span></h1>
-    <div class="card-carousel">
-      <a class="carousel-card is-active" href="https://links.dougmcarthur.net" aria-label="links.dougmcarthur.net">
-        <div class="card-face">
-          <img class="card-image" src="assets/qr.svg" alt="QR code for links.dougmcarthur.net">
-          <p class="card-caption">About Me</p>
-          <span class="sparkle sparkle-1"></span>
-          <span class="sparkle sparkle-2"></span>
-          <span class="sparkle sparkle-3"></span>
-          <span class="sparkle sparkle-4"></span>
-        </div>
-      </a>
-      <div class="carousel-card">
-        <div class="card-face">
-          <img class="card-image" src="assets/lost-weekends-1080x1080.jpg" alt="Lost Weekends cover art">
-          <p class="card-caption">Lost Weekends &mdash; Out Now</p>
-          <span class="sparkle sparkle-1"></span>
-          <span class="sparkle sparkle-2"></span>
-          <span class="sparkle sparkle-3"></span>
-          <span class="sparkle sparkle-4"></span>
-        </div>
-      </div>
-      <div class="carousel-card">
-        <div class="card-face">
-          <img class="card-image" src="assets/ig-dougmcarthur.png" alt="QR code for Instagram">
-          <p class="card-caption">Follow Me</p>
-          <span class="sparkle sparkle-1"></span>
-          <span class="sparkle sparkle-2"></span>
-          <span class="sparkle sparkle-3"></span>
-          <span class="sparkle sparkle-4"></span>
-        </div>
-      </div>
-    </div>
+    <div class="card-carousel"></div>
   </main>
-  <script>
-    // Logo animation variant, switchable for preview: ?logo=sheen|breathe|glow|none
-    const variants = ['sheen', 'breathe', 'glow', 'none'];
-    const requested = new URLSearchParams(location.search).get('logo');
-    document.body.dataset.logo = variants.includes(requested) ? requested : 'sheen';
-
-    // QR accent variant, switchable for preview: ?qr=pulse|ring|sparkle|none
-    const qrVariants = ['pulse', 'ring', 'sparkle', 'border', 'none'];
-    const requestedQr = new URLSearchParams(location.search).get('qr');
-    document.body.dataset.qr = qrVariants.includes(requestedQr) ? requestedQr : 'border';
-
-    // Border thickness for ?qr=border, in px: ?qrWidth=8
-    const requestedWidth = parseFloat(new URLSearchParams(location.search).get('qrWidth'));
-    if (!isNaN(requestedWidth) && requestedWidth >= 0) {
-      document.body.style.setProperty('--qr-border-width', `${requestedWidth}px`);
-    }
-
-    // Carousel: crossfade between the QR card and the latest release every
-    // few seconds. ?carousel=off freezes on the QR card (e.g. for the
-    // logo/QR preview variants above).
-    if (new URLSearchParams(location.search).get('carousel') !== 'off') {
-      const cards = document.querySelectorAll('.carousel-card');
-      let current = 0;
-      setInterval(() => {
-        cards[current].classList.remove('is-active');
-        current = (current + 1) % cards.length;
-        cards[current].classList.add('is-active');
-      }, 18000);
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
