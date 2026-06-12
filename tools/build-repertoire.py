@@ -158,15 +158,49 @@ TEMPLATE = """<!DOCTYPE html>
     margin-bottom: 0.3rem;
   }
   .subtitle { color: var(--muted); margin-bottom: 2rem; font-size: 0.9rem; line-height: 1.5; }
-  .sidebar h2 {
-    font-size: 0.75rem;
+  .category { border-bottom: 1px solid var(--border); }
+  .category:last-child { border-bottom: none; }
+  .category-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--accent);
-    margin: 2.2rem 0 0.4rem;
+    padding: 1.1rem 0.6rem;
+    margin: 0 -0.6rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
   }
-  .sidebar h2:first-of-type { margin-top: 0; }
+  .category-toggle:hover { background: rgba(245, 242, 234, 0.05); }
+  .category-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .category-toggle .count {
+    color: var(--muted);
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: normal;
+    margin-left: 0.5rem;
+  }
+  .category-toggle .arrow {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    opacity: 0.7;
+    transition: transform 0.15s ease;
+  }
+  .category.is-expanded .category-toggle .arrow { transform: rotate(90deg); }
+  .song-list { display: none; padding-bottom: 0.5rem; }
+  .category.is-expanded .song-list { display: block; }
   .song-item { border-bottom: 1px solid var(--border); }
   .song-item:last-child { border-bottom: none; }
   .song-toggle {
@@ -265,6 +299,15 @@ TEMPLATE = """<!DOCTYPE html>
     margin-bottom: 0.4rem;
   }
 
+  /* Mobile drill-down: categories -> songs -> content, one screen at a time. */
+  @media (max-width: 799px) {
+    body[data-view="songs"] .sidebar-header,
+    body[data-view="content"] .sidebar-header { display: none; }
+    body[data-view="songs"] .category:not(.is-expanded),
+    body[data-view="content"] .category:not(.is-expanded) { display: none; }
+    body[data-view="content"] .sidebar { display: none; }
+  }
+
   @media (min-width: 800px) {
     .layout { flex-direction: row; }
     .sidebar {
@@ -300,11 +343,13 @@ TEMPLATE = """<!DOCTYPE html>
 <body>
 <div class="layout">
   <nav class="sidebar">
-    <h1>Doug McArthur</h1>
-    <p class="subtitle">Repertoire &mdash; select a song for chords &amp; lyrics</p>
-    <section id="originals"></section>
-    <section id="solo-covers"></section>
-    <section id="band-covers"></section>
+    <div class="sidebar-header">
+      <h1>Doug McArthur</h1>
+      <p class="subtitle">Repertoire &mdash; select a category, then a song, for chords &amp; lyrics</p>
+    </div>
+    <div id="originals" class="category"></div>
+    <div id="solo-covers" class="category"></div>
+    <div id="band-covers" class="category"></div>
   </nav>
   <article class="content" id="content">
     <div class="content-inner">
@@ -321,8 +366,12 @@ TEMPLATE = """<!DOCTYPE html>
   const contentTitle = document.getElementById('content-title');
   const contentArtist = document.getElementById('content-artist');
   const contentBody = document.getElementById('content-body');
-  const sidebar = document.querySelector('.sidebar');
+  const categories = Array.from(document.querySelectorAll('.category'));
   let activeItem = null;
+
+  function isMobile() {
+    return window.innerWidth < 800;
+  }
 
   function showSong(song, item) {
     if (activeItem) activeItem.classList.remove('is-active');
@@ -333,35 +382,56 @@ TEMPLATE = """<!DOCTYPE html>
     contentBody.innerHTML = song.body;
     content.classList.add('is-open');
     content.scrollTop = 0;
-    if (window.innerWidth < 800) sidebar.style.display = 'none';
+    if (isMobile()) document.body.dataset.view = 'content';
   }
 
   document.getElementById('back-button').addEventListener('click', () => {
     content.classList.remove('is-open');
-    sidebar.style.display = '';
+    if (isMobile()) document.body.dataset.view = 'songs';
   });
 
-  function renderSection(el, heading, songs) {
-    const h2 = document.createElement('h2');
-    h2.textContent = heading;
-    el.appendChild(h2);
+  function renderCategory(el, heading, songs) {
+    const toggle = document.createElement('button');
+    toggle.className = 'category-toggle';
+    toggle.innerHTML = `<span>${heading}<span class="count">${songs.length}</span></span><span class="arrow">&#8250;</span>`;
+    toggle.addEventListener('click', () => {
+      if (isMobile()) {
+        if (el.classList.contains('is-expanded')) {
+          el.classList.remove('is-expanded');
+          document.body.dataset.view = 'categories';
+        } else {
+          categories.forEach((c) => c.classList.remove('is-expanded'));
+          el.classList.add('is-expanded');
+          document.body.dataset.view = 'songs';
+        }
+      } else {
+        el.classList.toggle('is-expanded');
+      }
+    });
+    el.appendChild(toggle);
+
+    const list = document.createElement('div');
+    list.className = 'song-list';
     for (const song of songs) {
       const wrap = document.createElement('div');
       wrap.className = 'song-item';
 
-      const toggle = document.createElement('button');
-      toggle.className = 'song-toggle';
-      toggle.innerHTML = `<span><span class="title">${song.title}</span><span class="artist">${song.artist}</span></span><span class="arrow">&#8250;</span>`;
-      toggle.addEventListener('click', () => showSong(song, wrap));
+      const songToggle = document.createElement('button');
+      songToggle.className = 'song-toggle';
+      songToggle.innerHTML = `<span><span class="title">${song.title}</span><span class="artist">${song.artist}</span></span><span class="arrow">&#8250;</span>`;
+      songToggle.addEventListener('click', () => showSong(song, wrap));
 
-      wrap.appendChild(toggle);
-      el.appendChild(wrap);
+      wrap.appendChild(songToggle);
+      list.appendChild(wrap);
     }
+    el.appendChild(list);
   }
 
-  renderSection(document.getElementById('originals'), 'Originals', data.originals);
-  renderSection(document.getElementById('solo-covers'), 'Covers — Solo', data.solo_covers);
-  renderSection(document.getElementById('band-covers'), 'Covers — Radio Riders (Full Band)', data.band_covers);
+  renderCategory(document.getElementById('originals'), 'Originals', data.originals);
+  renderCategory(document.getElementById('solo-covers'), 'Covers — Solo', data.solo_covers);
+  renderCategory(document.getElementById('band-covers'), 'Covers — Radio Riders (Full Band)', data.band_covers);
+
+  document.body.dataset.view = 'categories';
 </script>
 </body>
 </html>
