@@ -11,7 +11,7 @@
   --magic-green: #3e5c44;
   --magic-cream: #f3e6d6;
 
-  --qr-border-width: 4px;
+  --qr-border-width: 6px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
