@@ -14,6 +14,17 @@
     --border: #2a2f3a;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #3a4150 transparent;
+  }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb {
+    background: #3a4150;
+    border-radius: 8px;
+  }
+  *::-webkit-scrollbar-thumb:hover { background: #4a5263; }
   html, body {
     height: 100%;
     background: var(--bg);
@@ -29,6 +40,7 @@
   .sidebar {
     padding: 1.2rem 1rem 2rem;
     overflow-y: auto;
+    scrollbar-gutter: stable;
   }
   .sidebar h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
   .subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
