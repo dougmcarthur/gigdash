@@ -28,7 +28,7 @@
     // QR accent variant, switchable for preview: ?qr=pulse|ring|sparkle|none
     const qrVariants = ['pulse', 'ring', 'sparkle', 'border', 'none'];
     const requestedQr = new URLSearchParams(location.search).get('qr');
-    document.body.dataset.qr = qrVariants.includes(requestedQr) ? requestedQr : 'ring';
+    document.body.dataset.qr = qrVariants.includes(requestedQr) ? requestedQr : 'border';
 
     // Border thickness for ?qr=border, in px: ?qrWidth=8
     const requestedWidth = parseFloat(new URLSearchParams(location.search).get('qrWidth'));
