@@ -268,7 +268,9 @@ TEMPLATE = """<!DOCTYPE html>
   @media (min-width: 800px) {
     .layout { flex-direction: row; }
     .sidebar {
-      width: 340px;
+      width: 33%;
+      min-width: 280px;
+      max-width: 420px;
       flex-shrink: 0;
       border-right: 1px solid var(--border);
     }
