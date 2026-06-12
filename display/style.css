@@ -128,6 +128,34 @@ body[data-qr="pulse"] .qr-card {
   }
 }
 
+/* Variant: a crisp conic-gradient border rotates around the card edge,
+   animated by sweeping the gradient's angle via @property. */
+@property --border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+body[data-qr="border"] .qr-card {
+  border: 4px solid transparent;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    conic-gradient(
+      from var(--border-angle),
+      var(--accent),
+      #fff7e4,
+      var(--accent) 35%,
+      rgba(232, 180, 74, 0.15) 60%,
+      var(--accent)
+    ) border-box;
+  box-shadow: 0 0 26px rgba(232, 180, 74, 0.22);
+  animation: border-spin 4s linear infinite;
+}
+
+@keyframes border-spin {
+  to { --border-angle: 360deg; }
+}
+
 /* Variant: a soft conic-gradient halo slowly rotates behind the card. */
 body[data-qr="ring"] .qr-card {
   box-shadow: 0 0 26px rgba(232, 180, 74, 0.22);
@@ -193,4 +221,5 @@ body[data-qr="sparkle"] .sparkle {
 
 @media (prefers-reduced-motion: reduce) {
   .name-logo, .qr-card, .qr-card::before, .sparkle { animation: none !important; }
+  body[data-qr="border"] .qr-card { --border-angle: 45deg; }
 }
