@@ -11,6 +11,7 @@ network needed at the venue.
 |---|---|
 | `display/` | The fullscreen display app (static HTML/CSS, fully offline) |
 | `pi/` | Kiosk plumbing: provisioning script, systemd unit, browser launcher |
+| `steamdeck/` | (WIP) Steam Deck kiosk port — fallback/parallel target |
 | `image/` | pi-gen stage + build script for a flashable SD-card image |
 | `docs/ROADMAP.md` | Future feature ideas (dual screens, setlists, lighting) |
 
