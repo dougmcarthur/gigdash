@@ -14,7 +14,21 @@
   --qr-border-width: 6px;
 }
 
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap");
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/Poppins/Poppins-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/Poppins/Poppins-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
