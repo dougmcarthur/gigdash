@@ -19,4 +19,5 @@ exec "$BROWSER" \
     --disable-features=TranslateUI \
     --ozone-platform=wayland \
     --autoplay-policy=no-user-gesture-required \
+    --password-store=basic \
     "file:///opt/gigdash/display/index.html"

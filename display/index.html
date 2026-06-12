@@ -12,6 +12,10 @@
     <a class="qr-link" href="https://links.dougmcarthur.net" aria-label="links.dougmcarthur.net">
       <div class="qr-card">
         <img class="qr" src="assets/qr.svg" alt="QR code for links.dougmcarthur.net">
+        <span class="sparkle sparkle-1"></span>
+        <span class="sparkle sparkle-2"></span>
+        <span class="sparkle sparkle-3"></span>
+        <span class="sparkle sparkle-4"></span>
       </div>
     </a>
   </main>
@@ -20,6 +24,17 @@
     const variants = ['sheen', 'breathe', 'glow', 'none'];
     const requested = new URLSearchParams(location.search).get('logo');
     document.body.dataset.logo = variants.includes(requested) ? requested : 'sheen';
+
+    // QR accent variant, switchable for preview: ?qr=pulse|ring|sparkle|none
+    const qrVariants = ['pulse', 'ring', 'sparkle', 'border', 'none'];
+    const requestedQr = new URLSearchParams(location.search).get('qr');
+    document.body.dataset.qr = qrVariants.includes(requestedQr) ? requestedQr : 'border';
+
+    // Border thickness for ?qr=border, in px: ?qrWidth=8
+    const requestedWidth = parseFloat(new URLSearchParams(location.search).get('qrWidth'));
+    if (!isNaN(requestedWidth) && requestedWidth >= 0) {
+      document.body.style.setProperty('--qr-border-width', `${requestedWidth}px`);
+    }
   </script>
 </body>
 </html>
