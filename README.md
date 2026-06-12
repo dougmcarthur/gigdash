@@ -11,9 +11,8 @@ network needed at the venue.
 |---|---|
 | `display/` | The fullscreen display app (static HTML/CSS, fully offline) |
 | `pi/` | Kiosk plumbing: provisioning script, systemd unit, browser launcher |
-| `steamdeck/` | (WIP) Steam Deck kiosk port — fallback/parallel target |
 | `image/` | pi-gen stage + build script for a flashable SD-card image |
-| `docs/ROADMAP.md` | Future feature ideas (dual screens, setlists, lighting) |
+| `docs/ROADMAP.md` | Future ideas for the audience display (rotating slides, appliance polish) |
 
 ## Quick start (existing Raspberry Pi OS)
 
@@ -66,6 +65,6 @@ your photo over SSH to `/opt/gigdash/display/assets/photo.jpg`.
 
 ## What's next
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for the planned evolution: dual-monitor
-performer/audience mode, setlists and lyrics, phone remote control, and stage
-lighting.
+See [docs/ROADMAP.md](docs/ROADMAP.md) for planned improvements to the
+audience display: rotating slides between songs and appliance polish
+(read-only filesystem, easy updates).
