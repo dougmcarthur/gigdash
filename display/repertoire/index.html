@@ -7,30 +7,33 @@
 <style>
   :root {
     --bg: #0b0d12;
+    --bg-raised: #11141b;
     --fg: #f5f2ea;
     --accent: #e8b44a;
     --muted: #9aa0ab;
-    --card: #161a22;
-    --border: #2a2f3a;
+    --border: #242933;
+    --side-pad: 1.5rem;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   * {
     scrollbar-width: thin;
     scrollbar-color: #3a4150 transparent;
   }
-  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
   *::-webkit-scrollbar-track { background: transparent; }
   *::-webkit-scrollbar-thumb {
     background: #3a4150;
     border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
-  *::-webkit-scrollbar-thumb:hover { background: #4a5263; }
+  *::-webkit-scrollbar-thumb:hover { background: #4a5263; background-clip: content-box; }
   html, body {
     height: 100%;
     overflow: hidden;
     background: var(--bg);
     color: var(--fg);
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
     -webkit-text-size-adjust: 100%;
   }
   .layout {
@@ -41,96 +44,152 @@
   .sidebar {
     flex: 1;
     min-height: 0;
-    padding: 1.2rem 1rem 2rem;
+    padding: 1.75rem var(--side-pad) 2.5rem;
+    background: var(--bg-raised);
     overflow-y: auto;
     scrollbar-gutter: stable;
   }
-  .sidebar h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
-  .subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
-  h2 {
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--accent);
-    margin: 1.8rem 0 0.6rem;
+  .sidebar h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin-bottom: 0.3rem;
   }
+  .subtitle { color: var(--muted); margin-bottom: 2rem; font-size: 0.9rem; line-height: 1.5; }
+  .sidebar h2 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.2rem 0 0.4rem;
+  }
+  .sidebar h2:first-of-type { margin-top: 0; }
   .song-item { border-bottom: 1px solid var(--border); }
+  .song-item:last-child { border-bottom: none; }
   .song-toggle {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.6rem;
     width: 100%;
     text-align: left;
     background: none;
     border: none;
+    border-radius: 8px;
     color: var(--fg);
-    font-size: 1.05rem;
-    padding: 0.85rem 0.2rem;
+    font-size: 1rem;
+    line-height: 1.4;
+    padding: 0.8rem 0.6rem;
+    margin: 0 -0.6rem;
     cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
+  .song-toggle:hover { background: rgba(245, 242, 234, 0.05); }
+  .song-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .song-toggle .title { font-weight: 500; }
   .song-toggle .artist {
+    display: block;
     color: var(--muted);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: normal;
+    margin-top: 0.15rem;
   }
   .song-toggle .arrow {
     color: var(--muted);
     flex-shrink: 0;
-    margin-left: 0.6rem;
+    font-size: 1.1rem;
+    opacity: 0.6;
+    transition: transform 0.15s ease;
   }
-  .song-item.is-active .song-toggle { color: var(--accent); }
+  .song-item.is-active .song-toggle { background: rgba(232, 180, 74, 0.1); }
+  .song-item.is-active .song-toggle .title { color: var(--accent); }
+  .song-item.is-active .song-toggle .arrow { color: var(--accent); opacity: 1; transform: translateX(2px); }
 
   .content {
     display: none;
     flex: 1;
     min-height: 0;
-    padding: 1.2rem 1rem 4rem;
-    font-family: "SF Mono", "Menlo", "Consolas", monospace;
-    font-size: 1rem;
-    line-height: 1.6;
     overflow-y: auto;
     overflow-x: auto;
     scrollbar-gutter: stable;
   }
   .content.is-open { display: block; }
+  .content-inner {
+    padding: 1.5rem var(--side-pad) 4rem;
+    max-width: 70ch;
+  }
   .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     background: none;
     border: 1px solid var(--border);
-    color: var(--fg);
-    border-radius: 8px;
-    padding: 0.5rem 0.9rem;
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
     cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
   }
-  .content-title { font-size: 1.4rem; margin-bottom: 0.1rem; }
-  .content-artist { color: var(--muted); margin-bottom: 1.2rem; }
-  .content-body { white-space: pre-wrap; }
+  .back-button:hover { color: var(--fg); border-color: #3a4150; }
+  .content-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin-bottom: 0.25rem;
+  }
+  .content-artist {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .content-body {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
   .chord { color: var(--accent); font-weight: 700; }
-  .chord-line { color: var(--muted); font-style: italic; margin-bottom: 0.3rem; }
+  .chord-line {
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 0.4rem;
+  }
 
   @media (min-width: 800px) {
     .layout { flex-direction: row; }
     .sidebar {
-      width: 320px;
+      width: 340px;
       flex-shrink: 0;
       border-right: 1px solid var(--border);
     }
-    .content {
-      padding: 2rem 3rem 4rem;
-      font-size: 1.25rem;
-      line-height: 1.8;
+    .content-inner {
+      padding: 3rem 3.5rem 5rem;
     }
-    .content.is-open { display: block; }
-    .content:not(.is-open) { display: flex; align-items: center; justify-content: center; }
+    .content-body {
+      font-size: 1.15rem;
+      line-height: 1.85;
+    }
+    .content:not(.is-open) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .content:not(.is-open)::after {
       content: "Select a song to view chords & lyrics";
       color: var(--muted);
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
       font-size: 1rem;
     }
     .back-button { display: none; }
-    .content-title { font-size: 2rem; }
+    .content-title { font-size: 2.1rem; }
   }
 </style>
 </head>
@@ -144,10 +203,12 @@
     <section id="band-covers"></section>
   </nav>
   <article class="content" id="content">
-    <button class="back-button" id="back-button">&larr; Back to list</button>
-    <h2 class="content-title" id="content-title"></h2>
-    <p class="content-artist" id="content-artist"></p>
-    <div class="content-body" id="content-body"></div>
+    <div class="content-inner">
+      <button class="back-button" id="back-button">&larr; Back to list</button>
+      <h2 class="content-title" id="content-title"></h2>
+      <p class="content-artist" id="content-artist"></p>
+      <div class="content-body" id="content-body"></div>
+    </div>
   </article>
 </div>
 <script>
@@ -186,7 +247,7 @@
 
       const toggle = document.createElement('button');
       toggle.className = 'song-toggle';
-      toggle.innerHTML = `<span>${song.title}<br><span class="artist">${song.artist}</span></span><span class="arrow">&#8250;</span>`;
+      toggle.innerHTML = `<span><span class="title">${song.title}</span><span class="artist">${song.artist}</span></span><span class="arrow">&#8250;</span>`;
       toggle.addEventListener('click', () => showSong(song, wrap));
 
       wrap.appendChild(toggle);
