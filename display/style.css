@@ -14,6 +14,8 @@
   --qr-border-width: 6px;
 }
 
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap");
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
@@ -151,6 +153,7 @@ body[data-logo="glow"] .name-logo {
 .card-caption {
   margin: 0;
   color: var(--magic-teal);
+  font-family: "Poppins", "Futura", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: clamp(0.8rem, 1.6vh, 1.3rem);
   font-weight: 700;
   text-align: center;
