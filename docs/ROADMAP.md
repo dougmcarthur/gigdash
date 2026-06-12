@@ -28,6 +28,33 @@ fixed view:
 - Status/diagnostics: a way to confirm on boot that the display came up
   correctly (e.g. brief on-screen version/health indicator).
 
+## 3. Public release
+
+Make GigDash easy for other local artists to set up for themselves, with
+minimal manual configuration:
+
+- **Promo image fetcher**: pull the background image from a Manitoba Music
+  profile URL, Google Drive/Dropbox link, or direct image URL. No uploads —
+  fetch at setup/build time only.
+- **Instagram QR generator**: supply a handle, generate the QR code locally
+  (no IG login/API needed if just encoding `instagram.com/<handle>`).
+- **Brand colors**: derive accent/highlight colors from a website's CSS or
+  from a supplied image (e.g. album art), and apply them to the existing
+  `--accent` / carousel theme variables.
+- **One-shot "smart setup" scan**: given a single starting point (e.g.
+  Instagram handle or website), discover available assets (bio links,
+  cover art, profile photo) and present the artist with choices to build
+  their page — rather than configuring each source separately. Needs more
+  thought on scope/privacy before committing to this (see open questions
+  below).
+
+Open questions to revisit before building:
+- How much of this needs to run as a hosted service (fetch-time, e.g. on
+  Cloudflare) vs. a one-time local setup script the artist runs themselves?
+- The "smart scan" idea (Maigret-style discovery) is powerful but raises
+  privacy/scope concerns — likely start with explicit, source-by-source
+  configuration first, and revisit auto-discovery later if there's demand.
+
 ## Out of scope (for now)
 
 Dual-monitor performer/audience sync, setlists/lyrics/ChordPro, phone remote
