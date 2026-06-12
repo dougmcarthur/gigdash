@@ -113,16 +113,26 @@ TEMPLATE = """<!DOCTYPE html>
     --accent: #e8b44a;
     --muted: #9aa0ab;
     --card: #161a22;
+    --border: #2a2f3a;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
+    height: 100%;
     background: var(--bg);
     color: var(--fg);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     -webkit-text-size-adjust: 100%;
   }
-  main { max-width: 640px; margin: 0 auto; padding: 1.2rem 1rem 4rem; }
-  h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+  .layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .sidebar {
+    padding: 1.2rem 1rem 2rem;
+    overflow-y: auto;
+  }
+  .sidebar h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
   .subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
   h2 {
     font-size: 1.1rem;
@@ -131,7 +141,7 @@ TEMPLATE = """<!DOCTYPE html>
     color: var(--accent);
     margin: 1.8rem 0 0.6rem;
   }
-  .song { border-bottom: 1px solid #2a2f3a; }
+  .song-item { border-bottom: 1px solid var(--border); }
   .song-toggle {
     display: flex;
     justify-content: space-between;
@@ -151,36 +161,106 @@ TEMPLATE = """<!DOCTYPE html>
     font-weight: normal;
   }
   .song-toggle .arrow {
-    transition: transform 0.2s ease;
     color: var(--muted);
     flex-shrink: 0;
     margin-left: 0.6rem;
   }
-  .song.is-open .song-toggle .arrow { transform: rotate(90deg); }
-  .song-body {
+  .song-item.is-active .song-toggle { color: var(--accent); }
+
+  .content {
     display: none;
-    padding: 0 0.2rem 1.2rem;
+    padding: 1.2rem 1rem 4rem;
     font-family: "SF Mono", "Menlo", "Consolas", monospace;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    white-space: pre-wrap;
+    font-size: 1rem;
+    line-height: 1.6;
     overflow-x: auto;
   }
-  .song.is-open .song-body { display: block; }
+  .content.is-open { display: block; }
+  .back-button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+  }
+  .content-title { font-size: 1.4rem; margin-bottom: 0.1rem; }
+  .content-artist { color: var(--muted); margin-bottom: 1.2rem; }
+  .content-body { white-space: pre-wrap; }
   .chord { color: var(--accent); font-weight: 700; }
   .chord-line { color: var(--muted); font-style: italic; margin-bottom: 0.3rem; }
+
+  @media (min-width: 800px) {
+    .layout { flex-direction: row; }
+    .sidebar {
+      width: 320px;
+      flex-shrink: 0;
+      height: 100vh;
+      border-right: 1px solid var(--border);
+    }
+    .content {
+      flex: 1;
+      height: 100vh;
+      padding: 2rem 3rem 4rem;
+      font-size: 1.25rem;
+      line-height: 1.8;
+    }
+    .content.is-open { display: block; }
+    .content:not(.is-open) { display: flex; align-items: center; justify-content: center; }
+    .content:not(.is-open)::after {
+      content: "Select a song to view chords & lyrics";
+      color: var(--muted);
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 1rem;
+    }
+    .back-button { display: none; }
+    .content-title { font-size: 2rem; }
+  }
 </style>
 </head>
 <body>
-<main>
-  <h1>Doug McArthur</h1>
-  <p class="subtitle">Repertoire &mdash; tap a song for chords &amp; lyrics</p>
-  <section id="originals"></section>
-  <section id="solo-covers"></section>
-  <section id="band-covers"></section>
-</main>
+<div class="layout">
+  <nav class="sidebar">
+    <h1>Doug McArthur</h1>
+    <p class="subtitle">Repertoire &mdash; select a song for chords &amp; lyrics</p>
+    <section id="originals"></section>
+    <section id="solo-covers"></section>
+    <section id="band-covers"></section>
+  </nav>
+  <article class="content" id="content">
+    <button class="back-button" id="back-button">&larr; Back to list</button>
+    <h2 class="content-title" id="content-title"></h2>
+    <p class="content-artist" id="content-artist"></p>
+    <div class="content-body" id="content-body"></div>
+  </article>
+</div>
 <script>
   const data = __DATA__;
+  const content = document.getElementById('content');
+  const contentTitle = document.getElementById('content-title');
+  const contentArtist = document.getElementById('content-artist');
+  const contentBody = document.getElementById('content-body');
+  const sidebar = document.querySelector('.sidebar');
+  let activeItem = null;
+
+  function showSong(song, item) {
+    if (activeItem) activeItem.classList.remove('is-active');
+    activeItem = item;
+    activeItem.classList.add('is-active');
+    contentTitle.textContent = song.title;
+    contentArtist.textContent = song.artist;
+    contentBody.innerHTML = song.body;
+    content.classList.add('is-open');
+    content.scrollTop = 0;
+    if (window.innerWidth < 800) sidebar.style.display = 'none';
+  }
+
+  document.getElementById('back-button').addEventListener('click', () => {
+    content.classList.remove('is-open');
+    sidebar.style.display = '';
+  });
 
   function renderSection(el, heading, songs) {
     const h2 = document.createElement('h2');
@@ -188,19 +268,14 @@ TEMPLATE = """<!DOCTYPE html>
     el.appendChild(h2);
     for (const song of songs) {
       const wrap = document.createElement('div');
-      wrap.className = 'song';
+      wrap.className = 'song-item';
 
       const toggle = document.createElement('button');
       toggle.className = 'song-toggle';
-      toggle.innerHTML = `<span>${song.title}<br><span class="artist">${song.artist}</span></span><span class="arrow">&#9656;</span>`;
-      toggle.addEventListener('click', () => wrap.classList.toggle('is-open'));
-
-      const body = document.createElement('div');
-      body.className = 'song-body';
-      body.innerHTML = song.body;
+      toggle.innerHTML = `<span>${song.title}<br><span class="artist">${song.artist}</span></span><span class="arrow">&#8250;</span>`;
+      toggle.addEventListener('click', () => showSong(song, wrap));
 
       wrap.appendChild(toggle);
-      wrap.appendChild(body);
       el.appendChild(wrap);
     }
   }
