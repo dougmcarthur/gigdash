@@ -101,8 +101,8 @@ body[data-logo="glow"] .name-logo {
   50%      { filter: drop-shadow(0 0 18px rgba(232, 180, 74, 0.55)); }
 }
 
-/* The QR card and the "latest release" card occupy the same box and
-   crossfade between each other. */
+/* The QR, release, and Instagram cards occupy the same box and crossfade
+   between each other. */
 .card-carousel {
   position: relative;
   width: var(--qr-size);
@@ -112,33 +112,54 @@ body[data-logo="glow"] .name-logo {
 .carousel-card {
   position: absolute;
   inset: 0;
+  display: block;
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
+  /* On the web some cards double as tappable links; on the kiosk there's
+     no pointer, so this is inert. */
+  text-decoration: none;
 }
 
 .carousel-card.is-active {
   opacity: 1;
 }
 
-/* On the web the QR doubles as a tappable link; on the kiosk there's no
-   pointer, so this is inert. */
-.qr-link {
-  display: block;
-  line-height: 0;
-}
-
-/* White card behind the QR keeps it scannable on the dark scrim. The accent
-   animation around it (glow / rotating ring / sparkles) is controlled by
+/* White card behind each item keeps it legible on the dark scrim. Holds an
+   image (QR / cover art) plus a caption. The accent animation around it
+   (glow / rotating ring / sparkles / border) is controlled by
    body[data-qr] below. */
-.qr-card {
+.card-face {
   position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6em;
   background: #fff;
   border-radius: 20px;
   padding: 1.4vh;
 }
 
+.card-image {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.card-caption {
+  margin: 0;
+  color: var(--magic-teal);
+  font-size: clamp(0.8rem, 1.6vh, 1.3rem);
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 /* Variant: a slow golden glow breathes around the card (default fallback). */
-body[data-qr="pulse"] .qr-card {
+body[data-qr="pulse"] .card-face {
   animation: qr-glow 5.5s ease-in-out infinite;
 }
 
@@ -163,7 +184,7 @@ body[data-qr="pulse"] .qr-card {
   initial-value: 0deg;
 }
 
-body[data-qr="border"] .qr-card {
+body[data-qr="border"] .card-face {
   border: var(--qr-border-width) solid transparent;
   background:
     linear-gradient(#fff, #fff) padding-box,
@@ -184,11 +205,11 @@ body[data-qr="border"] .qr-card {
 }
 
 /* Variant: a soft conic-gradient halo slowly rotates behind the card. */
-body[data-qr="ring"] .qr-card {
+body[data-qr="ring"] .card-face {
   box-shadow: 0 0 26px rgba(243, 230, 214, 0.3);
 }
 
-body[data-qr="ring"] .qr-card::before {
+body[data-qr="ring"] .card-face::before {
   content: "";
   position: absolute;
   inset: -14%;
@@ -216,7 +237,7 @@ body[data-qr="ring"] .qr-card::before {
   display: none;
 }
 
-body[data-qr="sparkle"] .qr-card {
+body[data-qr="sparkle"] .card-face {
   box-shadow: 0 0 22px rgba(243, 230, 214, 0.25);
 }
 
@@ -241,45 +262,7 @@ body[data-qr="sparkle"] .sparkle {
   50%      { opacity: 1;   transform: scale(1); }
 }
 
-.qr {
-  width: var(--qr-size);
-  height: var(--qr-size);
-}
-
-/* "Latest release" carousel card: cover art with a caption strip along the
-   bottom, sized to match the QR card. */
-.release-card {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 0 26px rgba(243, 230, 214, 0.3);
-}
-
-.release-cover {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.release-caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: 0;
-  padding: 0.8em 1em;
-  background: rgba(11, 13, 18, 0.65);
-  color: var(--fg);
-  font-size: clamp(0.8rem, 1.6vh, 1.3rem);
-  font-weight: 600;
-  text-align: center;
-  letter-spacing: 0.02em;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .name-logo, .qr-card, .qr-card::before, .sparkle { animation: none !important; }
-  body[data-qr="border"] .qr-card { --border-angle: 45deg; }
+  .name-logo, .card-face, .card-face::before, .sparkle { animation: none !important; }
+  body[data-qr="border"] .card-face { --border-angle: 45deg; }
 }
