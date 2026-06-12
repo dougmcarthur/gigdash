@@ -17,17 +17,15 @@
           <button id="menuButton" class="rounded-full w-9 h-9 flex items-center justify-center text-slate-500 hover:bg-slate-100" aria-label="Menu">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 8a2 2 0 100-4 2 2 0 000 4zm0 6a2 2 0 100-4 2 2 0 000 4zm0 6a2 2 0 100-4 2 2 0 000 4z"/></svg>
           </button>
-          <div id="menuDropdown" class="hidden absolute right-0 mt-1 w-44 rounded-xl bg-white border border-slate-200 shadow-lg overflow-hidden z-10">
+          <div id="menuDropdown" class="hidden absolute right-0 mt-1 w-52 rounded-xl bg-white border border-slate-200 shadow-lg overflow-hidden z-10">
+            <button id="connectItem" class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50">Connect config.json…</button>
             <button id="exportItem" class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50">Export config…</button>
             <button id="importItem" class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50">Import config…</button>
           </div>
           <input id="importInput" type="file" accept="application/json" class="hidden">
         </div>
       </div>
-      <p class="text-sm text-slate-500">
-        Changes preview live on the right. Use the menu to export your
-        config for deployment, or import one to continue editing.
-      </p>
+      <p id="saveStatus" class="text-sm text-slate-500"></p>
 
       <!-- Global settings card -->
       <section class="rounded-2xl bg-slate-50 border border-slate-200 divide-y divide-slate-200">
@@ -191,6 +189,71 @@ function addSlide(type) {
 
 function updatePreview() {
   preview.contentWindow.postMessage({ type: 'gigdash-config', config }, '*');
+  scheduleSave();
+}
+
+// --- Autosave to a connected config.json (File System Access API) ---
+
+let fileHandle = null;
+let saveTimer = null;
+const saveStatus = document.getElementById('saveStatus');
+const supportsFs = 'showOpenFilePicker' in window;
+
+function setStatus(text) {
+  saveStatus.textContent = text;
+}
+
+function timeNow() {
+  return new Date().toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+}
+
+function scheduleSave() {
+  if (!fileHandle) return;
+  setStatus('Saving…');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 500);
+}
+
+async function saveNow() {
+  if (!fileHandle) return;
+  try {
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(config, null, 2));
+    await writable.close();
+    setStatus(`Saved at ${timeNow()}`);
+  } catch (err) {
+    console.error('Autosave failed', err);
+    setStatus('Could not save — check file permissions');
+  }
+}
+
+async function connectFile() {
+  if (!supportsFs) {
+    alert('Your browser doesn\'t support saving directly to a file. Use Export/Import instead (Chrome or Edge support autosave).');
+    return;
+  }
+  try {
+    const [handle] = await window.showOpenFilePicker({
+      types: [{ description: 'GigDash config', accept: { 'application/json': ['.json'] } }],
+    });
+    const permission = await handle.requestPermission({ mode: 'readwrite' });
+    if (permission !== 'granted') {
+      setStatus('Read-only — changes will not be saved');
+      return;
+    }
+    const file = await handle.getFile();
+    config = JSON.parse(await file.text());
+    fileHandle = handle;
+    render();
+    updatePreview();
+    setStatus(`Connected to ${handle.name} — saved at ${timeNow()}`);
+  } catch (err) {
+    if (err.name !== 'AbortError') console.error('Connect failed', err);
+  }
+}
+
+if (!supportsFs) {
+  setStatus('Autosave needs Chrome or Edge — use the menu to export/import for now.');
 }
 
 document.getElementById('logoAnimation').onchange = (e) => { config.logoAnimation = e.target.value; updatePreview(); };
@@ -210,6 +273,11 @@ document.addEventListener('click', (e) => {
     menuDropdown.classList.add('hidden');
   }
 });
+
+document.getElementById('connectItem').onclick = () => {
+  menuDropdown.classList.add('hidden');
+  connectFile();
+};
 
 document.getElementById('exportItem').onclick = () => {
   menuDropdown.classList.add('hidden');
