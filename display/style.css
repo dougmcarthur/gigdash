@@ -3,7 +3,7 @@
   --fg: #f5f2ea;
   --accent: #e8b44a;
   --qr-size: clamp(140px, 26vh, 520px);
-  --logo-width: clamp(280px, 34vw, 1000px);
+  --logo-width: clamp(280px, 42vw, 1200px);
 
   /* Palette pulled from the "Magic" cover art: deep teal, forest green,
      and the pale dawn-sky cream. */
