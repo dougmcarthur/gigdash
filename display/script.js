@@ -19,7 +19,13 @@ async function fetchNextGig({ artistName, appId }) {
     const url = `https://rest.bandsintown.com/artists/${encodeURIComponent(artistName)}/events?app_id=${appId}`;
     const res = await fetch(url);
     const events = await res.json();
-    const next = Array.isArray(events) ? events[0] : null;
+    const list = Array.isArray(events) ? events : [];
+    // Skip a show happening today — that's the gig being played right now,
+    // not an upcoming one worth advertising. Bandsintown datetimes are the
+    // venue's local wall-clock time, so compare local calendar dates.
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const next = list.find((ev) => ev.datetime && ev.datetime.slice(0, 10) !== todayStr) || null;
     const gig = next
       ? {
           date: new Date(next.datetime).toLocaleDateString(undefined, {
