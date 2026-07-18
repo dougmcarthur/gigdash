@@ -11,19 +11,14 @@
 
     <!-- Options panel -->
     <aside class="w-full max-w-md overflow-y-auto bg-white border-r border-slate-200 p-4 space-y-4">
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between gap-2">
         <h1 class="text-lg font-bold">GigDash Display Editor</h1>
-        <div class="relative">
-          <button id="menuButton" class="rounded-full w-9 h-9 flex items-center justify-center text-slate-500 hover:bg-slate-100" aria-label="Menu">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 8a2 2 0 100-4 2 2 0 000 4zm0 6a2 2 0 100-4 2 2 0 000 4zm0 6a2 2 0 100-4 2 2 0 000 4z"/></svg>
-          </button>
-          <div id="menuDropdown" class="hidden absolute right-0 mt-1 w-52 rounded-xl bg-white border border-slate-200 shadow-lg overflow-hidden z-10">
-            <button id="connectItem" class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50">Connect config.json…</button>
-            <button id="exportItem" class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50">Export config…</button>
-            <button id="importItem" class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50">Import config…</button>
-          </div>
-          <input id="importInput" type="file" accept="application/json" class="hidden">
-        </div>
+        <button id="saveButton" class="rounded-lg bg-emerald-600 text-white text-sm font-medium px-4 py-1.5 hover:bg-emerald-700">Save</button>
+      </div>
+      <div>
+        <input id="editToken" type="password" placeholder="Edit password"
+               autocomplete="current-password"
+               class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm">
       </div>
       <p id="saveStatus" class="text-sm text-slate-500"></p>
 
@@ -204,74 +199,68 @@ function addSlide(type) {
   updatePreview();
 }
 
-function updatePreview() {
+function pushPreview() {
   preview.contentWindow.postMessage({ type: 'gigdash-config', config }, '*');
+}
+
+function updatePreview() {
+  pushPreview();
   scheduleSave();
 }
 
-// --- Autosave to a connected config.json (File System Access API) ---
+// --- Persistence: one hosted config via /api/config (Cloudflare KV) ---
+// Auto-saves as you edit; the Save button forces an immediate save. The
+// edit password authorizes writes and is remembered on this device.
 
-let fileHandle = null;
-let saveTimer = null;
 const saveStatus = document.getElementById('saveStatus');
-const supportsFs = 'showOpenFilePicker' in window;
+const saveButton = document.getElementById('saveButton');
+const editToken = document.getElementById('editToken');
+const TOKEN_KEY = 'gigdash-editor-token';
+let saveTimer = null;
+
+editToken.value = localStorage.getItem(TOKEN_KEY) || '';
+editToken.oninput = () => localStorage.setItem(TOKEN_KEY, editToken.value);
 
 function setStatus(text) {
   saveStatus.textContent = text;
 }
 
 function timeNow() {
-  return new Date().toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  return new Date().toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
 
 function scheduleSave() {
-  if (!fileHandle) return;
   setStatus('Saving…');
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveNow, 500);
+  saveTimer = setTimeout(saveNow, 700);
 }
 
 async function saveNow() {
-  if (!fileHandle) return;
-  try {
-    const writable = await fileHandle.createWritable();
-    await writable.write(JSON.stringify(config, null, 2));
-    await writable.close();
-    setStatus(`Saved at ${timeNow()}`);
-  } catch (err) {
-    console.error('Autosave failed', err);
-    setStatus('Could not save — check file permissions');
-  }
-}
-
-async function connectFile() {
-  if (!supportsFs) {
-    alert('Your browser doesn\'t support saving directly to a file. Use Export/Import instead (Chrome or Edge support autosave).');
+  clearTimeout(saveTimer);
+  if (!editToken.value) {
+    setStatus('Enter your edit password to save changes');
     return;
   }
+  setStatus('Saving…');
   try {
-    const [handle] = await window.showOpenFilePicker({
-      types: [{ description: 'GigDash config', accept: { 'application/json': ['.json'] } }],
+    const res = await fetch('/api/config', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${editToken.value}`,
+      },
+      body: JSON.stringify(config, null, 2),
     });
-    const permission = await handle.requestPermission({ mode: 'readwrite' });
-    if (permission !== 'granted') {
-      setStatus('Read-only — changes will not be saved');
-      return;
-    }
-    const file = await handle.getFile();
-    config = JSON.parse(await file.text());
-    fileHandle = handle;
-    render();
-    updatePreview();
-    setStatus(`Connected to ${handle.name} — saved at ${timeNow()}`);
+    if (res.status === 401) { setStatus('Wrong edit password — not saved'); return; }
+    if (!res.ok) { setStatus(`Couldn’t save (${res.status})`); return; }
+    setStatus(`Saved at ${timeNow()}`);
   } catch (err) {
-    if (err.name !== 'AbortError') console.error('Connect failed', err);
+    console.error('Save failed', err);
+    setStatus('Couldn’t save — no connection');
   }
 }
 
-if (!supportsFs) {
-  setStatus('Autosave needs Chrome or Edge — use the menu to export/import for now.');
-}
+saveButton.onclick = saveNow;
 
 document.getElementById('logoAnimation').onchange = (e) => { config.logoAnimation = e.target.value; updatePreview(); };
 document.getElementById('cardAnimation').onchange = (e) => { config.cardAnimation = e.target.value; updatePreview(); };
@@ -282,58 +271,23 @@ document.querySelectorAll('[data-add]').forEach((btn) => {
   btn.onclick = () => addSlide(btn.dataset.add);
 });
 
-const menuButton = document.getElementById('menuButton');
-const menuDropdown = document.getElementById('menuDropdown');
-menuButton.onclick = () => menuDropdown.classList.toggle('hidden');
-document.addEventListener('click', (e) => {
-  if (!menuButton.contains(e.target) && !menuDropdown.contains(e.target)) {
-    menuDropdown.classList.add('hidden');
+// Load the current hosted config, falling back to the bundled default so the
+// editor still works before anything has been saved.
+async function loadInitial() {
+  let data = null;
+  try {
+    const res = await fetch('/api/config', { cache: 'no-store' });
+    if (res.ok) data = await res.json();
+  } catch (_) {}
+  if (!data) {
+    try { data = await (await fetch('../config.json')).json(); } catch (_) { data = { slides: [] }; }
   }
-});
-
-document.getElementById('connectItem').onclick = () => {
-  menuDropdown.classList.add('hidden');
-  connectFile();
-};
-
-document.getElementById('exportItem').onclick = () => {
-  menuDropdown.classList.add('hidden');
-  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'config.json';
-  a.click();
-};
-
-const importInput = document.getElementById('importInput');
-document.getElementById('importItem').onclick = () => {
-  menuDropdown.classList.add('hidden');
-  importInput.click();
-};
-importInput.onchange = () => {
-  const file = importInput.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      config = JSON.parse(reader.result);
-      render();
-      updatePreview();
-    } catch (err) {
-      alert('Could not read that file as a valid config.json: ' + err.message);
-    }
-  };
-  reader.readAsText(file);
-  importInput.value = '';
-};
-
-fetch('../config.json')
-  .then((r) => r.json())
-  .then((data) => {
-    config = data;
-    render();
-    preview.onload = updatePreview;
-  });
+  config = data;
+  render();
+  preview.onload = pushPreview;
+  if (!editToken.value) setStatus('Enter your edit password to save changes');
+}
+loadInitial();
 </script>
 </body>
 </html>

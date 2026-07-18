@@ -180,13 +180,36 @@ async function applyConfig(config) {
   }
 }
 
+const CONFIG_CACHE_KEY = 'gigdash-config-cache';
+
+// Phone home for the latest hosted config, cache it for offline use, and
+// fall back to the last cached copy (then the bundled default) when there's
+// no connection — this is what lets the Pi kiosk pick up edits once online.
+async function loadConfig() {
+  try {
+    const res = await fetch('/api/config', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`config endpoint ${res.status}`);
+    const text = await res.text();
+    const config = JSON.parse(text);
+    try { localStorage.setItem(CONFIG_CACHE_KEY, text); } catch (_) {}
+    return config;
+  } catch (err) {
+    console.warn('Live config unavailable; using cached/default', err);
+    try {
+      const cached = localStorage.getItem(CONFIG_CACHE_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    const res = await fetch('config.json');
+    return res.json();
+  }
+}
+
 async function init() {
   try {
-    const res = await fetch('config.json');
-    const config = await res.json();
+    const config = await loadConfig();
     await applyConfig(config);
   } catch (err) {
-    console.error('Failed to load config.json', err);
+    console.error('Failed to load config', err);
     document.querySelector('.card-carousel').innerHTML =
       '<div class="carousel-card is-active"><div class="card-face card-face-text">' +
       '<p class="card-eyebrow">Config error</p>' +
