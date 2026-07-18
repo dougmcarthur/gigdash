@@ -126,18 +126,26 @@ function render() {
 
   slideListEl.innerHTML = '';
   config.slides.forEach((slide, i) => {
+    const enabled = slide.enabled !== false;
     const card = document.createElement('div');
-    card.className = 'rounded-2xl bg-slate-50 border border-slate-200 p-3 space-y-2';
+    card.className = 'rounded-2xl bg-slate-50 border border-slate-200 p-3 space-y-2' + (enabled ? '' : ' opacity-60');
 
     const header = document.createElement('div');
-    header.className = 'flex items-center justify-between';
+    header.className = 'flex items-center justify-between gap-2';
     header.innerHTML = `
-      <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">${TYPE_LABELS[slide.type] || slide.type}</span>
-      <div class="flex gap-1">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 truncate">${TYPE_LABELS[slide.type] || slide.type}</span>
+        <label class="flex items-center gap-1 text-xs cursor-pointer select-none ${enabled ? 'text-emerald-700' : 'text-slate-400'}">
+          <input type="checkbox" data-enabled ${enabled ? 'checked' : ''} class="accent-emerald-600">
+          <span>${enabled ? 'Shown' : 'Hidden'}</span>
+        </label>
+      </div>
+      <div class="flex gap-1 shrink-0">
         <button class="text-xs rounded-full bg-slate-200 w-6 h-6 hover:bg-slate-300" data-move="-1">↑</button>
         <button class="text-xs rounded-full bg-slate-200 w-6 h-6 hover:bg-slate-300" data-move="1">↓</button>
         <button class="text-xs rounded-full bg-red-100 text-red-700 w-6 h-6 hover:bg-red-200" data-remove>✕</button>
       </div>`;
+    header.querySelector('[data-enabled]').onchange = (e) => toggleSlide(i, e.target.checked);
     header.querySelector('[data-move="-1"]').onclick = () => moveSlide(i, -1);
     header.querySelector('[data-move="1"]').onclick = () => moveSlide(i, 1);
     header.querySelector('[data-remove]').onclick = () => removeSlide(i);
@@ -173,6 +181,15 @@ function moveSlide(i, dir) {
 
 function removeSlide(i) {
   config.slides.splice(i, 1);
+  render();
+  updatePreview();
+}
+
+function toggleSlide(i, on) {
+  // Omit the flag when shown (the default) so configs stay clean; only
+  // write enabled:false when a slide is turned off.
+  if (on) delete config.slides[i].enabled;
+  else config.slides[i].enabled = false;
   render();
   updatePreview();
 }

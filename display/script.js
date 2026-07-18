@@ -113,7 +113,7 @@ async function applyConfig(config) {
   // Resolve next-gig slides, dropping any with no upcoming event (e.g.
   // offline, or nothing booked) so the carousel never shows a dead slide.
   const resolved = [];
-  for (const slide of config.slides || []) {
+  for (const slide of (config.slides || []).filter((s) => s.enabled !== false)) {
     if (slide.type === 'next-gig') {
       const gig = await fetchNextGig(slide.bandsintown || {});
       if (gig) resolved.push({ ...slide, _gig: gig });

@@ -281,18 +281,25 @@ body[data-qr="sparkle"] .sparkle {
 
 /* Text-based card variant (e.g. next-gig date/venue), in place of an
    image + caption. */
+/* Size the next-show text relative to the card itself (container query
+   units) rather than the viewport, so it fills the card at whatever
+   --qr-size is set to. cqmin = 1% of the card's shorter side. */
 .card-face-text {
+  container-type: size;
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 1.4em 1.2em;
+  gap: 0;
+  /* Percentage padding (relative to the card box) — avoid cq units here
+     since sizing the container from its own container units is circular. */
+  padding: 7% 6%;
 }
 
 .card-eyebrow {
-  margin: 0 0 0.4em;
+  margin: 0 0 0.5em;
   color: var(--magic-green);
   font-family: "Poppins", "Futura", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: clamp(0.7rem, 1.4vh, 1.1rem);
+  font-size: clamp(0.7rem, 5.5cqmin, 2rem);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -302,21 +309,23 @@ body[data-qr="sparkle"] .sparkle {
   margin: 0;
   color: var(--magic-teal);
   font-family: "Poppins", "Futura", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: clamp(1.2rem, 3.2vh, 2.4rem);
+  font-size: clamp(1.2rem, 12cqmin, 4.4rem);
   font-weight: 700;
+  line-height: 1.05;
 }
 
 .gig-venue {
-  margin: 0.3em 0 0;
+  margin: 0.45em 0 0;
   color: #1a1a1a;
   font-weight: 600;
-  font-size: clamp(0.9rem, 2vh, 1.4rem);
+  font-size: clamp(0.9rem, 7.5cqmin, 2.6rem);
+  line-height: 1.1;
 }
 
 .gig-location {
-  margin: 0.1em 0 0;
+  margin: 0.2em 0 0;
   color: var(--magic-teal);
-  font-size: clamp(0.8rem, 1.6vh, 1.2rem);
+  font-size: clamp(0.8rem, 5.5cqmin, 2rem);
 }
 
 @media (prefers-reduced-motion: reduce) {
