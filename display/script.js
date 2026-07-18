@@ -47,6 +47,50 @@ async function fetchNextGig({ artistName, appId }) {
   }
 }
 
+// Prefer show data baked in by tools/bake-next-show.py (works offline on the
+// Pi kiosk), falling back to a live Bandsintown fetch when it isn't present.
+let bakedShowsPromise = null;
+function loadBakedShows() {
+  if (!bakedShowsPromise) {
+    bakedShowsPromise = fetch('assets/next-show.json')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => (Array.isArray(d?.shows) ? d.shows : null))
+      .catch(() => null);
+  }
+  return bakedShowsPromise;
+}
+
+function pickUpcomingShow(shows) {
+  // Same "skip a show happening today" rule as the live path, applied here
+  // so it stays correct even when the data was baked days earlier.
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  return shows.find((s) => s.datetime && s.datetime.slice(0, 10) !== todayStr) || null;
+}
+
+function formatBakedGig(s) {
+  return {
+    date: new Date(s.datetime).toLocaleDateString(undefined, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    }),
+    venue: s.venue || '',
+    location: s.location || '',
+    url: s.url || '',
+    poster: s.poster || '',
+  };
+}
+
+async function resolveNextGig(slide) {
+  const shows = await loadBakedShows();
+  if (shows) {
+    const next = pickUpcomingShow(shows);
+    return next ? formatBakedGig(next) : null;
+  }
+  return fetchNextGig(slide.bandsintown || {});
+}
+
 function sparkles() {
   return `<span class="sparkle sparkle-1"></span><span class="sparkle sparkle-2"></span>` +
          `<span class="sparkle sparkle-3"></span><span class="sparkle sparkle-4"></span>`;
@@ -55,7 +99,11 @@ function sparkles() {
 function cardInner(slide) {
   if (slide.type === 'next-gig') {
     const gig = slide._gig;
+    const poster = gig.poster
+      ? `<img class="gig-poster" src="${gig.poster}" alt="" aria-hidden="true">`
+      : '';
     return `
+      ${poster}
       <p class="card-eyebrow">${slide.caption || 'Next Show'}</p>
       <p class="gig-date">${gig.date}</p>
       <p class="gig-venue">${gig.venue}</p>
@@ -82,7 +130,9 @@ function renderSlides(slides) {
       el.setAttribute('aria-label', slide.caption || '');
     }
     const face = document.createElement('div');
-    face.className = 'card-face' + (slide.type === 'next-gig' ? ' card-face-text' : '');
+    face.className = 'card-face' +
+      (slide.type === 'next-gig' ? ' card-face-text' : '') +
+      (slide.type === 'next-gig' && slide._gig?.poster ? ' has-poster' : '');
     face.innerHTML = cardInner(slide);
     el.appendChild(face);
     carousel.appendChild(el);
@@ -115,7 +165,7 @@ async function applyConfig(config) {
   const resolved = [];
   for (const slide of (config.slides || []).filter((s) => s.enabled !== false)) {
     if (slide.type === 'next-gig') {
-      const gig = await fetchNextGig(slide.bandsintown || {});
+      const gig = await resolveNextGig(slide);
       if (gig) resolved.push({ ...slide, _gig: gig });
     } else {
       resolved.push(slide);
