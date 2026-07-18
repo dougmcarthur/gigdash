@@ -145,4 +145,51 @@ window.addEventListener('message', (event) => {
   }
 });
 
+// Fullscreen toggle. On desktop and Android the Fullscreen API drops the
+// browser chrome directly. On iPad, Safari exposes no Fullscreen API for
+// arbitrary elements, so the button is hidden there and the standalone
+// "Add to Home Screen" launch (see the manifest + apple meta tags) is the
+// way to run chrome-free.
+function setupFullscreen() {
+  const btn = document.querySelector('.fullscreen-toggle');
+  if (!btn) return;
+
+  const el = document.documentElement;
+  const request =
+    el.requestFullscreen || el.webkitRequestFullscreen || el.webkitRequestFullScreen;
+  const exit = document.exitFullscreen || document.webkitExitFullscreen;
+  const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+
+  // Already running standalone (launched from the Home Screen) — there's no
+  // chrome to escape, so the control would be noise.
+  const standalone =
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+
+  // Embedded (e.g. the editor's preview iframe): no chrome of our own to
+  // toggle, and cross-frame fullscreen is blocked anyway.
+  const embedded = window.self !== window.top;
+
+  if (!request || standalone || embedded) return;
+
+  btn.hidden = false;
+
+  btn.addEventListener('click', () => {
+    if (fsElement()) {
+      if (exit) exit.call(document);
+    } else {
+      const p = request.call(el);
+      if (p && typeof p.catch === 'function') {
+        p.catch((err) => console.error('Fullscreen request failed', err));
+      }
+    }
+  });
+
+  const sync = () => document.body.classList.toggle('is-fullscreen', !!fsElement());
+  document.addEventListener('fullscreenchange', sync);
+  document.addEventListener('webkitfullscreenchange', sync);
+}
+
+setupFullscreen();
 init();
