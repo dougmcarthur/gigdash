@@ -191,5 +191,34 @@ function setupFullscreen() {
   document.addEventListener('webkitfullscreenchange', sync);
 }
 
+// Screen Wake Lock: keep the display awake for unattended kiosk use
+// (iPadOS Safari 16.4+, plus desktop Chrome/Edge). The OS releases the lock
+// whenever the page is hidden — screen off, app switch, tab change — so we
+// re-acquire it every time the page becomes visible again. This is a backup
+// to the device's own Auto-Lock: Never setting, not a replacement for it.
+function setupWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+
+  let sentinel = null;
+
+  const acquire = async () => {
+    if (document.visibilityState !== 'visible') return;
+    try {
+      sentinel = await navigator.wakeLock.request('screen');
+      sentinel.addEventListener('release', () => { sentinel = null; });
+    } catch (err) {
+      // Rejected e.g. on low battery or when not user-visible; harmless.
+      console.error('Wake lock request failed', err);
+    }
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !sentinel) acquire();
+  });
+
+  acquire();
+}
+
 setupFullscreen();
+setupWakeLock();
 init();
